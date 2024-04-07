@@ -1,0 +1,13 @@
+.hovered-link:hover {
+    text-decoration: none;
+    color: gray;
+}
+
+form {
+    max-width: 350px;
+}
+
+.weight-500 {
+    font-weight: 500;
+    font-size: 35px;
+}

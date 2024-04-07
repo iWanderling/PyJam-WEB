@@ -4,7 +4,9 @@ from flask_login import UserMixin
 import sqlalchemy
 import datetime
 
+
 from .db_session import SqlAlchemyBase
+
 
 class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     __tablename__ = 'users'
