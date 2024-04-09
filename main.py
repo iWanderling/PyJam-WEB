@@ -1,13 +1,16 @@
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from flask import Flask, render_template, redirect, request, abort, make_response, jsonify
+from flask import Flask, render_template, redirect, request
 
-from Documentation.examples.example import recognize_song, identifier
+from data.audio_handlers.recognize_handler import recognize_song, identifier
+from data.audio_handlers.charts_handler import charts_handler
 
 from data.forms.register_form import RegisterForm
 from data.forms.login_form import LoginForm
 
+from data.ORM.recognized import Recognized
 from data.ORM import db_session
-from data.ORM.user import *
+from data.ORM.user import User
+
 
 import os
 
@@ -32,24 +35,7 @@ def load_user(user_id):
 @app.route('/', methods=["GET", "POST"])
 def main():
     """ Главная страница """
-
-    # Если пользователь ничего не отправил - возвращаем обычную страницу
-    if request.method == "GET":
-        return render_template('main.html')
-
-    # Если пользователь отправил файл на распознание, то возвращаем пользователю информацию о распознанном треке:
-    elif request.method == "POST":
-
-        # Загружаем отправленный пользователем файл:
-        f = request.files['file']
-        file_path = 'static/music/' + identifier()
-        f.save(file_path)
-
-        # Распознаём песню, затем удаляем загруженный файл с сервера:
-        info = recognize_song(file_path)
-        os.remove(file_path)
-        return render_template('main.html', message=f'{info[0]}, {info[1]}',
-                               background=info[2])
+    return render_template('main.html')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -138,19 +124,60 @@ def logout():
     return redirect("/")
 
 
-@app.route('/recognize')
+@app.route('/recognize', methods=["GET", "POST"])
 def recognize():
-    return render_template('recognize.html')
+    # Если пользователь ничего не отправил - возвращаем обычную страницу
+    if request.method == "GET":
+        return render_template('recognize.html', waiting=True)
 
+    # Если пользователь отправил файл на распознание, то возвращаем пользователю информацию о распознанном треке:
+    elif request.method == "POST":
 
-@app.route('/charts')
+        # Загружаем отправленный пользователем файл:
+        f = request.files['file']
+        file_path = 'static/music/' + identifier()
+        f.save(file_path)
+
+        try:
+            # Распознаём песню, затем удаляем загруженный файл с сервера:
+            print(recognize_song(file_path))
+            title, band, background = recognize_song(file_path)
+            os.remove(file_path)
+
+            recognized = Recognized()
+            recognized.link = background
+            recognized.track = title
+            recognized.band = band
+            recognized.belonging = current_user.id
+            recognized.is_favourite = False
+
+            db_sess.add(recognized)
+            db_sess.commit()
+
+            return render_template('recognize.html', message=f'{title}, {band}',
+                                   background=background, waiting=False)
+        except:
+            return render_template('recognize.html', message='Not Found', waiting=True)
+
+@app.route('/charts', methods=["GET", "POST"])
 def charts():
-    return render_template('charts.html')
+    """ Мировой топ песен """
+    world_top = charts_handler()
+    return render_template('charts.html', world_top=world_top)
 
 
-@app.route('/settings')
+@app.route('/library')
 def settings():
-    return render_template('settings.html')
+    """ Распознанные песни """
+    if current_user.is_authenticated:
+        recognized = db_sess.query(Recognized).filter(Recognized.belonging == current_user.id).all()
+        all_tracks = list()
+
+        for i in recognized:
+            all_tracks.append((i.link, i.track, i.band, ' '.join(i.time.split()[:-1])[:-1]))
+
+        return render_template('library.html', all_tracks=all_tracks)
+    return render_template('library.html')
 
 
 if __name__ == '__main__':

@@ -1,8 +1,3 @@
-.hovered-link:hover {
-    text-decoration: none;
-    color: gray;
-}
-
 form {
     max-width: 350px;
 }
@@ -10,4 +5,12 @@ form {
 .weight-500 {
     font-weight: 500;
     font-size: 35px;
+}
+
+.charts-content-block {
+    margin: 50px 10px;
+}
+
+.charts-song-cover {
+    border-radius: 11px;
 }

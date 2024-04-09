@@ -1,17 +1,6 @@
 {% extends "base.html" %}
-{% block title %} Main {% endblock %}
+{% block title %} Главная {% endblock %}
 
 {% block content %}
-    <div>
-        <p>{{ message }}</p>
-        <img src= {{ background }}>
-    </div>
-    <form class="login_form" method="post" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="photo">Приложите звуковой файл</label>
-            <input type="file" accept=".mp3,.m4a" class="form-control-file" id="photo" name="file">
-        </div>
-        <button type="submit" class="btn btn-primary">Распознать</button>
-    </form>
-
+    <p>Здесь будет храниться приветственное сообщение и основная информация</p>
 {% endblock %}

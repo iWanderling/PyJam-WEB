@@ -35,17 +35,17 @@
                  width="30" height="30" class="d-inline-block align-top" alt="">
             PyJam
         </div>
-        <p class="weight-500">
+        <div class="navbar-brand" style="font-size: 10px; font-weight: 500;">
             <a class="navbar-brand" href="/"> Главная </a>
-            <a class="navbar-brand" href="/charts"> Мировой топ </a>
-            <a class="navbar-brand" href="/recognize"> Распознать песню </a>
+            <a class="navbar-brand" href="/charts"> Хит-парад </a>
+            <a class="navbar-brand" href="/recognize"> Распознать </a>
             {% if current_user.is_authenticated %}
-            <a class="navbar-brand" href="/settings"> Настройки </a>
+            <a class="navbar-brand" href="/library"> Библиотека </a>
             <a class="navbar-brand" href="/logout">Выйти</a>
             {% else %}
             <a class="navbar-brand" href="/login"> Войти </a>
             {% endif %}
-        </p>
+        </div>
     </nav>
 </header>
 

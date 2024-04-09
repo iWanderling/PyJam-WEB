@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %} Библиотека {% endblock %}
+
+{% block content %}
+    {% if current_user.is_authenticated %}
+        <h1> Здесь будут лежать все распознанные треки </h1>
+        {% for i in all_tracks %}
+        <div class="">
+            <div class="charts-content-block">
+            <img width="125px"
+                 height="125px"
+                 class="charts-song-cover"
+                 src={{ i[0] }}>
+
+                <div style="font-weight: 500"> {{loop.index}}. {{ i[1] }} </div>
+                {{ i[2] }}
+                <div> {{ i[3] }} </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <h1> Войдите, чтобы сохранять распознанные треки </h1>
+    {% endif %}
+{% endblock %}

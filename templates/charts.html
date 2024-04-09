@@ -2,5 +2,18 @@
 {% block title %} Чарты {% endblock %}
 
 {% block content %}
-    В разработке
+    <h1> ТОП-25</h1>
+    {% for i in world_top %}
+    <div class="">
+        <div class="charts-content-block">
+        <img width="125px"
+             height="125px"
+             class="charts-song-cover"
+             src={{ i[2] }}>
+
+            <div style="font-weight: 500"> {{loop.index}}. {{ i[0] }} </div>
+            {{ i[1] }}
+        </div>
+        {% endfor %}
+    </div>
 {% endblock %}
