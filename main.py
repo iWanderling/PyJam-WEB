@@ -1,11 +1,15 @@
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask import Flask, render_template, redirect, request, abort, make_response, jsonify
 
+from Documentation.examples.example import recognize_song, identifier
+
 from data.forms.register_form import RegisterForm
 from data.forms.login_form import LoginForm
 
 from data.ORM import db_session
 from data.ORM.user import *
+
+import os
 
 
 # Инициализация приложения
@@ -18,17 +22,34 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-# Загрузка пользователя:
 @login_manager.user_loader
 def load_user(user_id):
+    """ :Загрузка пользователя: """
     db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
 
 
-@app.route('/')
+@app.route('/', methods=["GET", "POST"])
 def main():
     """ Главная страница """
-    return render_template('main.html')
+
+    # Если пользователь ничего не отправил - возвращаем обычную страницу
+    if request.method == "GET":
+        return render_template('main.html')
+
+    # Если пользователь отправил файл на распознание, то возвращаем пользователю информацию о распознанном треке:
+    elif request.method == "POST":
+
+        # Загружаем отправленный пользователем файл:
+        f = request.files['file']
+        file_path = 'static/music/' + identifier()
+        f.save(file_path)
+
+        # Распознаём песню, затем удаляем загруженный файл с сервера:
+        info = recognize_song(file_path)
+        os.remove(file_path)
+        return render_template('main.html', message=f'{info[0]}, {info[1]}',
+                               background=info[2])
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -115,6 +136,7 @@ def logout():
     """ Функция обрабатывает выход пользователя из аккаунта """
     logout_user()
     return redirect("/")
+
 
 @app.route('/recognize')
 def recognize():

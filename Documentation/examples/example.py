@@ -1,18 +1,29 @@
 """ Пример: Распознать аудиофайл (необходимо использование ffmpeg.exe последней версии) """
-import asyncio
 from shazamio import Shazam
+from random import choice
+import asyncio
+import string
 
+def identifier():
+    abc = string.ascii_lowercase + string.ascii_uppercase + string.digits
+    return ''.join([choice(abc) for _ in range(9)]) + '.mp3'
 
-async def main():
-    shazam = Shazam()
-    out = await shazam.recognize('file.mp3')  # rust version, use this
-    print(out)
-
-
-if __name__ == '__main__':
+def recognize_song(file='file.mp3'):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
+
     try:
-        loop.run_until_complete(main())
-    except KeyboardInterrupt:
-        pass
+        rec = loop.run_until_complete(main(file))['track']
+        title = rec['title']
+        subtitle = rec['subtitle']
+        background = rec['images']['background']
+        return title, subtitle, background
+
+    except Exception as ex:
+        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+        message = template.format(type(ex).__name__, ex.args[0])
+        return message
+
+
+async def main(file):
+    return await Shazam().recognize(file)
