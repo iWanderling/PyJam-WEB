@@ -17,8 +17,6 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     email = sqlalchemy.Column(sqlalchemy.String, unique=True, nullable=True)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
 
-    # modified_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
-
     # Кэшировать пароль
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)

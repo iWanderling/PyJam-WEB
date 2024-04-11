@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %} Распознать песню {% endblock %}
+
+{% block content %}
+    {% if track %}
+        <div class="recognize-window">
+            <figure style="margin: 40px 0px;">
+                <img width="250px" height="250px" style="border-radius: 25px" src= {{ track.background }}>
+                <figcaption> {{ track.track }}, {{ track.band }} {{ track.popularity }} </figcaption>
+            </figure>
+    {% else %}
+            The track you requested is not found
+    {% endif %}
+
+{% endblock %}

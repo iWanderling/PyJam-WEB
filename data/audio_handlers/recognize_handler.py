@@ -6,6 +6,10 @@ import asyncio
 import string
 
 
+asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+UNKNOWN_SONG = "https://i1.sndcdn.com/artworks-000417448131-gof0f8-t500x500.jpg"
+
+
 def identifier():
     """ Создаёт уникальное имя для файла, который нужно распознать.
         Предотвращает распознавание чужого файла (например, в ситуации, где 2 пользователя
@@ -38,12 +42,19 @@ def recognize_song(file='file.mp3', all_info=None):
         # то функция вернёт название трека и исполнителя, а также ссылку альбома трека:
         if all_info is None:
             title = data['track']['title']  # название песни
-            subtitle = data['track']['subtitle']  # название исполнителя
-            background = data['track']['images']['background']  # ссылка на изображение альбома песни
-            return title, subtitle, background
-        return data  # возврат полной информация
+            band = data['track']['subtitle']  # название исполнителя
+            shazam_id = data['matches'][0]['id']  # ID песни в Shazam
+            if 'images' in data['track']:
+                background = data['track']['images']['background']  # ссылка на изображение альбома песни
+            else:
+                background = UNKNOWN_SONG
 
-    except Exception as ex:
-        template = "An exception of type {0} occurred. Arguments:\n{1!r}"
-        message = template.format(type(ex).__name__, ex.args[0])
-        return message
+            # Возвращаем указанную информацию:
+            return shazam_id, title, band, background
+
+        # Возвращаем полную информацию:
+        return data
+
+    # Если распознать трек не удалось, то возвращаем None:
+    except KeyError:
+        return None

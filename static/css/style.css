@@ -14,3 +14,11 @@ form {
 .charts-song-cover {
     border-radius: 11px;
 }
+
+.recognize-window {
+    padding: 75px 0px;
+}
+
+.header-navigation-bar {
+    margin-bottom: 20px;
+}

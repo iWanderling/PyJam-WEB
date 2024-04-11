@@ -2,19 +2,19 @@
 {% block title %} Распознать песню {% endblock %}
 
 {% block content %}
-    {% if not waiting %}
+    <div class="recognize-window">
         <figure style="margin: 40px 0px;">
             <img width="250px" height="250px" style="border-radius: 25px" src= {{ background }}>
-            <figcaption> {{ message }} </figcaption>
+            <figcaption> {{ track }}, {{ band }} </figcaption>
         </figure>
-    {% endif %}
 
-    <form class="login_form" method="post" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="rec">Приложите звуковой файл</label>
-            <input type="file" accept=".mp3,.m4a" class="form-control-file" id="rec" name="file">
-        </div>
-        <button type="submit" class="btn btn-primary">Распознать</button>
-    </form>
+        <form method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="rec">Приложите звуковой файл</label>
+                <input type="file" accept=".mp3,.m4a" class="form-control-file" id="rec" name="file">
+            </div>
+            <button type="submit" class="btn btn-primary">Распознать</button>
+        </form>
+    </div>
 
 {% endblock %}

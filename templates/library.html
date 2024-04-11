@@ -2,23 +2,31 @@
 {% block title %} Библиотека {% endblock %}
 
 {% block content %}
-    {% if current_user.is_authenticated %}
-        <h1> Здесь будут лежать все распознанные треки </h1>
-        {% for i in all_tracks %}
-        <div class="">
-            <div class="charts-content-block">
-            <img width="125px"
-                 height="125px"
-                 class="charts-song-cover"
-                 src={{ i[0] }}>
 
-                <div style="font-weight: 500"> {{loop.index}}. {{ i[1] }} </div>
-                {{ i[2] }}
-                <div> {{ i[3] }} </div>
-            </div>
-            {% endfor %}
+    {% if current_user.is_authenticated %}
+        <div class="library-navigation-bar">
+            <a href="library" class="btn btn-danger"> Все треки </a>
+            <a href="featured" class="btn btn-warning"> Избранное </a>
         </div>
+
+        {% for i in library %}
+            <div style="margin: 20px 0px;">
+                <img width="130px" height="130px" class="charts-song-cover" src={{ i[0].background }}>
+
+                <div style="font-weight: 500"> {{loop.index}}. {{ i[0].track }}  </div>
+                {{ i[0].band }}
+                <div> {{ i[1].date }} </div>
+                {% if current_user.is_authenticated %}
+                    <a href="" class="btn btn-warning" style="margin-right: 30px">⭐</a>
+
+                    <form action="delete-track" method="get">
+                        <a href="/delete/track/{{ i[1].id }}" class="btn btn-danger" methods="delete">🗑️</a>
+                    </form>
+                {% endif %}
+            </div>
+        {% endfor %}
     {% else %}
         <h1> Войдите, чтобы сохранять распознанные треки </h1>
     {% endif %}
+
 {% endblock %}

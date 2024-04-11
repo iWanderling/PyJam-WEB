@@ -32,15 +32,16 @@ class Recognized(SqlAlchemyBase, SerializerMixin):
     __tablename__ = 'recognized'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    link = sqlalchemy.Column(sqlalchemy.String, nullable=True)  # Ссылка на изображение
-    track = sqlalchemy.Column(sqlalchemy.String, nullable=True)  # Название песни
-    band = sqlalchemy.Column(sqlalchemy.String, nullable=True)  # Название исполнителя
 
-    # ID пользователя, который распознал музыку / песню:
-    belonging = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
+    # ID пользователя, который распознал музыку / песню (связан с users.id):
+    user_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
 
-    time = sqlalchemy.Column(sqlalchemy.String, default=get_valid_date)  # Время распознания
+    # ID распознанного пользователем трека (связан с tracks.id):
+    track_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("tracks.id"))
+
+    date = sqlalchemy.Column(sqlalchemy.String, default=get_valid_date)  # Время распознания
     is_favourite = sqlalchemy.Column(sqlalchemy.Boolean)  # Избранная ли песня
 
     # Связываемся с таблицей Users:
     user = orm.relationship('User')
+    track = orm.relationship('Track')
