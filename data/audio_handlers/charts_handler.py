@@ -1,32 +1,47 @@
 """ Модуль позволяет получить самую популярную во всём мире музыку / песню """
 from shazamio import Shazam
+from pprint import pprint
 import asyncio
 
 
 UNKNOWN_SONG = "https://i1.sndcdn.com/artworks-000417448131-gof0f8-t500x500.jpg"
+LIMIT_CONSTANT = 100
 
 
-async def main(limit_constant):
-    """ Получить информацию о самых популярных треках в мире """
-    return await Shazam().top_world_tracks(limit=limit_constant)
+async def world_top():
+    """ Вернуть информацию о самых популярных треках в мире """
+    return await Shazam().top_world_tracks(limit=LIMIT_CONSTANT)
 
 
-def charts_handler(limit_constant=25):
-    """ Получить информацию о самых популярных треках в мире
-            limit_constant[int] -> необязательный параметр; получить первые N позиций в топе """
+async def country_top(country):
+    """ Вернуть информацию о самых популярных треках в стране <country> """
+    return await Shazam().top_country_tracks(country, LIMIT_CONSTANT)
 
+
+def charts_handler(country):
+    """ Получить информацию о самых популярных треках """
+
+    rating = []
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-
-    data = loop.run_until_complete(main(limit_constant))['tracks']
-    world_top = []
+    if country == 'world':
+        data = loop.run_until_complete(world_top())['tracks']
+    else:
+        data = loop.run_until_complete(country_top(country))['tracks']
 
     # Создание списка списков с информацией о топе:
     for i in data:
-        dataset = [i['title'], i['subtitle']]
+        dataset = dict()
+        if 'actions' in i['hub']:
+            dataset['shazam_id'] = i['hub']['actions'][0]['id']
+        dataset['track'] = i['title']
+        dataset['band'] = i['subtitle']
+
         if 'image' in i['share']:
-            dataset.append(i['share']['image'])
+            dataset['background'] = i['share']['image']
         else:
-            dataset.append(UNKNOWN_SONG)
-        world_top.append(dataset)
-    return world_top
+            dataset['background'] = UNKNOWN_SONG
+
+        rating.append(dataset)
+    return rating
+

@@ -22,3 +22,11 @@ form {
 .header-navigation-bar {
     margin-bottom: 20px;
 }
+
+.library-track-buttons {
+  display: flex;
+ }
+
+.library-track-href {
+    text-decoration: none
+}

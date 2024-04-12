@@ -2,17 +2,48 @@
 {% block title %} Чарты {% endblock %}
 
 {% block content %}
-    <h1> ТОП-25</h1>
-    {% for i in world_top %}
+    <h5> {{ country }} </h5>
+    <h1> ТОП 100 </h1>
+
+    <a href="/charts/world" class="btn btn-danger"> Мировой топ </a>
+
+    <div class="dropdown">
+      <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        ТОП 100
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" href="/charts/AU">Австралия</a>
+        <a class="dropdown-item" href="/charts/AT">Австрия</a>
+        <a class="dropdown-item" href="/charts/BY">Беларусь</a>
+        <a class="dropdown-item" href="/charts/UK">Великобритания</a>
+        <a class="dropdown-item" href="/charts/DE">Германия</a>
+        <a class="dropdown-item" href="/charts/DK">Дания</a>
+        <a class="dropdown-item" href="/charts/ES">Испания</a>
+        <a class="dropdown-item" href="/charts/IT">Италия</a>
+        <a class="dropdown-item" href="/charts/CN">Китай</a>
+        <a class="dropdown-item" href="/charts/PT">Португалия</a>
+        <a class="dropdown-item" href="/charts/RU">Россия</a>
+        <a class="dropdown-item" href="/charts/US">США</a>
+        <a class="dropdown-item" href="/charts/RS">Сербия</a>
+        <a class="dropdown-item" href="/charts/FI">Финляндия</a>
+        <a class="dropdown-item" href="/charts/FR">Франция</a>
+        <a class="dropdown-item" href="/charts/CH">Швейцария</a>
+      </div>
+    </div>
+
+    {% for i in top %}
     <div class="">
         <div class="charts-content-block">
         <img width="125px"
              height="125px"
              class="charts-song-cover"
-             src={{ i[2] }}>
+             src={{ i.background }}>
 
-            <div style="font-weight: 500"> {{loop.index}}. {{ i[0] }} </div>
-            {{ i[1] }}
+            <div style="font-weight: 500"><a href="/charts/track/{{ i.db_id }}">
+                {{loop.index}}. {{ i.track }}
+            </a></div>
+
+            {{ i.band }}
         </div>
         {% endfor %}
     </div>

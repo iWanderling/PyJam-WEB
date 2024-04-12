@@ -1,21 +1,26 @@
+# Модули для работы с Flask
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, jsonify
 
+# Обработчики ShazamAPI
 from data.audio_handlers.recognize_handler import recognize_song, identifier
 from data.audio_handlers.charts_handler import charts_handler, UNKNOWN_SONG
 
+# Форма регистрации и авторизации
 from data.forms.register_form import RegisterForm
 from data.forms.login_form import LoginForm
 
+# ORM-модели
 from data.ORM import db_session
 from data.ORM.recognized import Recognized, get_valid_date
 from data.ORM.track import Track
 from data.ORM.user import User
 
+# Для удаления загруженных на сервер файлов
 import os
 
 
-# Инициализация приложения
+# Инициализация приложения:
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'FFFFF0-JHKMQ1-KRMB89-KLLLVV-ZZHMN5'
 
@@ -135,7 +140,6 @@ def recognize():
         Следующие параметры не являются обязательными и не передаются в функцию:
 
         message[str] - сообщение для пользователя
-        waiting[bool] - ожидание ответа от распознающей функции; если False, то функция отобразит информацию о треке
         shazam_id[int] - ID трека в Shazam
         track[str] - название трека
         band[str] - название исполнителя
@@ -143,13 +147,15 @@ def recognize():
 
     # Если пользователь ничего не отправил - возвращаем обычную страницу
     if request.method == "GET":
-        return render_template('recognize.html', waiting=True, background=UNKNOWN_SONG)
+        return render_template('recognize.html', background=UNKNOWN_SONG)
 
     # Если пользователь отправил файл на распознание, то возвращаем пользователю информацию о распознанном треке:
     elif request.method == "POST":
 
-        # Загружаем отправленный пользователем файл:
+        # Загружаем отправленный пользователем файл, если пользователь ничего не отправил - перезагружаем страницу:
         f = request.files['file']
+        if not f.filename:
+            return render_template('recognize.html', message='Вы не отправили файл', background=UNKNOWN_SONG)
         file_path = 'static/music/' + identifier()
         f.save(file_path)
 
@@ -159,7 +165,7 @@ def recognize():
 
         # Если программа не смогла определить трек, то уведомляем пользователя об этом:
         if track_data is None:
-            return render_template('recognize.html', message='Not Found')
+            return redirect('/recognize/track/0')
 
         # Если определение прошло успешно, то обрабатываем полученную информацию и формируем ответ:
         # Берём данные о треке:
@@ -210,8 +216,14 @@ def recognize():
 
 
 @app.route('/recognize/track/<int:track_id>')
+@app.route('/charts/track/<int:track_id>')
+@app.route('/track/<int:track_id>')
 def track_info(track_id):
     """ Вернуть страницу с информацией о треке """
+
+    # Если трек не удалось распознать, то ничего не отправляем на вывод:
+    if track_id == 0:
+        return render_template('track.html')
     track = db_sess.query(Track).filter(Track.id == track_id).first()
     return render_template('track.html', track=track)
 
@@ -241,11 +253,65 @@ def delete_track(track_id):
     return redirect('/library')
 
 
+@app.route('/featured')
+def featured():
+    featured_library = list()
+    featured_tracks = db_sess.query(Recognized).filter(Recognized.user_id == current_user.id,
+                                                       Recognized.is_favourite == 1).all()
+
+    for i in featured_tracks:
+        track = db_sess.query(Track).filter(Track.id == i.id).first()
+        featured_library.append((track, i))
+
+    return render_template('library.html', library=reversed(featured_library))
+
+
+@app.route('/feature/track/<int:track_id>', methods=["GET"])
+def feature_track(track_id):
+    track = db_sess.query(Recognized).filter(Recognized.user_id == current_user.id,
+                                             Recognized.track_id == track_id).first()
+    if not track.is_favourite:
+        track.is_favourite = 1
+    else:
+        track.is_favourite = 0
+
+    db_sess.commit()
+    return redirect('/library')
+
+
+@app.route('/Charts/<country>/<genre>', methods=["GET", "POST"])
+@app.route('/charts/<country>', methods=["GET", "POST"])
 @app.route('/charts', methods=["GET", "POST"])
-def charts():
+def charts(country=None, genre=None):
     """ Данная функция позволяет пользователю ознакомиться с мировым хит-парадом песен """
-    world_top = charts_handler()
-    return render_template('charts.html', world_top=world_top)
+
+    # Возвращаем мировой топ, если не введены параметры в адрес:
+    if country is None and genre is None:
+        return redirect('/charts/world')
+
+    top = charts_handler(country=country)
+
+    for i in top:
+        if 'shazam_id' in i:
+            existing = db_sess.query(Track).filter(Track.shazam_id == i['shazam_id']).first()
+
+            if not existing:
+                track = Track()
+                track.shazam_id = i['shazam_id']
+                track.track = i['track']
+                track.band = i['band']
+                track.background = i['background']
+                track.popularity = 0
+                db_sess.add(track)
+                db_sess.commit()
+
+                i['db_id'] = track.id
+            else:
+                i['db_id'] = db_sess.query(Track).filter(Track.shazam_id == i['shazam_id']).first().id
+        else:
+            i['db_id'] = 0
+
+    return render_template('charts.html', top=top, country=country)
 
 
 if __name__ == '__main__':

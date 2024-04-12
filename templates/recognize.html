@@ -2,6 +2,10 @@
 {% block title %} Распознать песню {% endblock %}
 
 {% block content %}
+    {% if message %}
+        {{ message }}
+    {% endif %}
+
     <div class="recognize-window">
         <figure style="margin: 40px 0px;">
             <img width="250px" height="250px" style="border-radius: 25px" src= {{ background }}>

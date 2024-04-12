@@ -1,5 +1,6 @@
 """ Модуль позволяет распознать практически любой аудиофайл, отправленный пользователем сайта
    (примечание: необходимо использование ffmpeg.exe последней версии) """
+from pprint import pprint
 from shazamio import Shazam
 from random import choice
 import asyncio
@@ -58,3 +59,5 @@ def recognize_song(file='file.mp3', all_info=None):
     # Если распознать трек не удалось, то возвращаем None:
     except KeyError:
         return None
+
+

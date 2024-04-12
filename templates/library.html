@@ -13,15 +13,27 @@
             <div style="margin: 20px 0px;">
                 <img width="130px" height="130px" class="charts-song-cover" src={{ i[0].background }}>
 
-                <div style="font-weight: 500"> {{loop.index}}. {{ i[0].track }}  </div>
+                {% if i[1].is_favourite %}
+                    <div style="font-weight: 500">
+                        <a class="library-track-href" href="track/{{i[0].id}}"> {{loop.index}}. {{ i[0].track }} ⭐ </a>
+                    </div>
+                {% else %}
+                    <div style="font-weight: 500">
+                        <a class="library-track-href" href="track/{{i[0].id}}"> {{loop.index}}. {{ i[0].track }} </a>
+                    </div>
+                {% endif %}
+
                 {{ i[0].band }}
                 <div> {{ i[1].date }} </div>
                 {% if current_user.is_authenticated %}
-                    <a href="" class="btn btn-warning" style="margin-right: 30px">⭐</a>
-
-                    <form action="delete-track" method="get">
-                        <a href="/delete/track/{{ i[1].id }}" class="btn btn-danger" methods="delete">🗑️</a>
-                    </form>
+                    <div class="library-track-buttons">
+                        <form action="/aaa" method="post">
+                            <a href="feature/track/{{ i[1].id }}" class="btn btn-warning" style="margin-right: 30px">⭐</a>
+                        </form>
+                        <form action="delete-track" method="get">
+                            <a href="/delete/track/{{ i[1].id }}" class="btn btn-danger" methods="delete">🗑️</a>
+                        </form>
+                    </div>
                 {% endif %}
             </div>
         {% endfor %}
