@@ -20,7 +20,15 @@ form {
 }
 
 .header-navigation-bar {
-    margin-bottom: 20px;
+    position: fixed; /* Зафиксировать панель навигации */
+    top: 0; /* Прикрепить её к верхней части экрана */
+    width: 100%; /* Занимать всю доступную ширину */
+    z-index: 1000; /* Установить высокий z-index, чтобы панель была поверх остального содержимого */
+    background-color: #007bff; /* Цвет фона панели навигации */
+}
+
+.container {
+    margin-top: 100px; /* Высота панели навигации + небольшой отступ */
 }
 
 .library-track-buttons {
@@ -29,4 +37,73 @@ form {
 
 .library-track-href {
     text-decoration: none
+}
+
+
+
+/* Добавляем стили для подсветки квадратной области при наведении */
+.navbar-brand {
+    position: relative;
+}
+
+/* Создаем псевдоэлемент */
+.navbar-brand::after {
+    content: "";
+    position: absolute;
+    bottom: -11px; /* Располагаем псевдоэлемент под текстом ссылки */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 3px;
+    background-color: #fff; /* Начальный цвет квадратной области */
+    transition: width 0.3s ease; /* Плавное изменение ширины */
+}
+
+/* Добавляем стили для подсветки квадратной области при наведении */
+.navbar-brand:hover::after {
+    width: 100%; /* Увеличиваем ширину квадратной области при наведении */
+}
+
+/* Изменяем цвет текста ссылки при наведении */
+.navbar-brand:hover {
+    color: #007bff; /* Цвет текста ссылки при наведении */
+}
+
+/* Стили для активной ссылки */
+.navbar-brand.active {
+    background-color: #fff; /* Цвет фона активной ссылки */
+    color: #007bff; /* Цвет текста активной ссылки */
+    border-radius: 5px; /* Закругление углов */
+}
+
+/* Добавляем стили для подсветки квадратной области активной ссылки */
+.navbar-brand.active::after {
+    width: 100%; /* Ширина квадратной области */
+}
+
+.btn-group > .btn {
+    margin-right: 30px; /* Расстояние между кнопками */
+}
+
+.top-100-heading {
+  background: linear-gradient(to right, cyan, blue, #007bff);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-animation: rainbow 5s ease infinite;
+  animation: rainbow 20s ease infinite;
+  font-size: 65px;
+  line-height: 75px;
+}
+
+@-webkit-keyframes rainbow {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
+}
+
+@keyframes rainbow {
+  0% { background-position: 0% 50% }
+  50% { background-position: 100% 50% }
+  100% { background-position: 0% 50% }
 }
