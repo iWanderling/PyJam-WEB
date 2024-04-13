@@ -14,25 +14,72 @@
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 <a class="dropdown-item" href="/charts/AU">Австралия</a>
                 <a class="dropdown-item" href="/charts/AT">Австрия</a>
-                <!-- Другие страны -->
+                <a class="dropdown-item" href="/charts/BY">Беларусь</a>
+                <a class="dropdown-item" href="/charts/UK">Великобритания</a>
+                <a class="dropdown-item" href="/charts/DE">Германия</a>
+                <a class="dropdown-item" href="/charts/DK">Дания</a>
+                <a class="dropdown-item" href="/charts/ES">Испания</a>
+                <a class="dropdown-item" href="/charts/IT">Италия</a>
+                <a class="dropdown-item" href="/charts/CN">Китай</a>
+                <a class="dropdown-item" href="/charts/PT">Португалия</a>
+                <a class="dropdown-item" href="/charts/RU">Россия</a>
+                <a class="dropdown-item" href="/charts/US">США</a>
+                <a class="dropdown-item" href="/charts/RS">Сербия</a>
+                <a class="dropdown-item" href="/charts/FI">Финляндия</a>
+                <a class="dropdown-item" href="/charts/FR">Франция</a>
+                <a class="dropdown-item" href="/charts/CH">Швейцария</a>
             </div>
         </div>
     </div>
 
-    {% for i in top %}
-    <div class="">
-        <div class="charts-content-block">
-            <img width="125px"
-                 height="125px"
-                 class="charts-song-cover"
-                 src={{ i.background }}>
+    <div class="row">
+        {% for i in top[:3] %}
+            <div class="col-md-4">
+                <div class="charts-content-block big-song" style="position: relative;">
+                    <div class="badge badge-primary badge-pill d-flex justify-content-center align-items-center" style="position: absolute; top: 10px; right: 130px; top: 0; font-size: 40px; background-color: transparent; width: 40px; height: 40px; line-height: 40px; text-align: center; border-radius: 50%;">
+                        {% if loop.index == 1 %}
+                            🥇
+                        {% elif loop.index == 2 %}
+                            🥈
+                        {% else %}
+                            🥉
+                        {% endif %}
+                    </div>
+                    <span style="font-size: 24px;"></span> <!-- Здесь медаль -->
+                    <img width="200px"
+                         height="200px"
+                         class="charts-song-cover"
+                         src={{ i.background }}>
 
-            <div style="font-weight: 500"><a href="/charts/track/{{ i.db_id }}">
-                {{loop.index}}. {{ i.track }}
-            </a></div>
+                    <div style="font-weight: 500"><a href="/charts/track/{{ i.db_id }}">
+                        {{ i.track }}
+                    </a></div>
 
-            {{ i.band }}
-        </div>
+                    {{ i.band }}
+                </div>
+            </div>
+        {% endfor %}
     </div>
-    {% endfor %}
+
+    <div class="row">
+        {% for i in top[3:] %}
+            {% if loop.index % 4 == 1 %}
+                </div><div class="row">
+            {% endif %}
+            <div class="col-md-3" style="margin-bottom: 0px;">
+                <div class="charts-content-block">
+                    <img width="125px"
+                         height="125px"
+                         class="charts-song-cover"
+                         src={{ i.background }}>
+
+                    <div style="font-weight: 500"><a href="/charts/track/{{ i.db_id }}">
+                        {{loop.index + 3}}. {{ i.track }}
+                    </a></div>
+
+                    {{ i.band }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}

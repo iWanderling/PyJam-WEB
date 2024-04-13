@@ -13,7 +13,6 @@
         {{ error }}
     </div>
     {% endfor %}
-    </p>
     <p>
         {{ form.password.label }}<br>
         {{ form.password(class="form-control", type="password") }}<br>
@@ -24,9 +23,9 @@
     {% endfor %}
     </p>
     <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
-    <div>
-    <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
-    <a class="btn btn-success" href="/register">Ещё не зарегистрированы?</a>
+    <div class="button-container">
+        <p style="display: inline-block;">{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+        <p style="display: inline-block; margin-left: 10px;"><a class="btn btn-success" href="/register">Ещё не зарегистрированы?</a></p>
     </div>
 </form>
 <h2 style="padding-top: 50px"> {{ message }}</h2>
