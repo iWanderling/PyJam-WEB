@@ -55,9 +55,14 @@
         background-color: #f8d7da;
         border: 1px solid #f5c6cb;
     }
+
+    .error-field {
+    border: 2px solid red !important;
+    box-shadow: 0px 0px 5px 2px rgba(255, 0, 0, 0.5) !important;
+    }
 </style>
 
-<form action="" method="post" class="login-form">
+<form action="" method="post" class="login-form {% if form.email.errors or form.password.errors or form.password_again.errors or form.surname.errors or form.name.errors %}error-field{% endif %}">
     <h1>Регистрация</h1>
     {{ form.hidden_tag() }}
     <div class="form-group">
