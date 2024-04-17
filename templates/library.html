@@ -25,7 +25,6 @@
 
                 {{ i[0].band }}
                 <div> {{ i[1].date }} </div>
-                {% if current_user.is_authenticated %}
                     <div class="library-track-buttons">
                         <form action="/aaa" method="post">
                             <a href="feature/track/{{ i[1].id }}" class="btn btn-warning" style="margin-right: 30px">⭐</a>
@@ -34,7 +33,6 @@
                             <a href="/delete/track/{{ i[1].id }}" class="btn btn-danger" methods="delete">🗑️</a>
                         </form>
                     </div>
-                {% endif %}
             </div>
         {% endfor %}
     {% else %}

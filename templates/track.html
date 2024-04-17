@@ -1,15 +1,30 @@
 {% extends "base.html" %}
 {% block title %} Распознать песню {% endblock %}
 
+{% block scripts %}
+<script>
+    function copyToClipboard(link) {
+        navigator.clipboard.writeText(link)
+    }
+</script>
+{% endblock %}
+
 {% block content %}
     {% if track %}
         <div class="recognize-window">
             <figure style="margin: 40px 0px;">
                 <img width="250px" height="250px" style="border-radius: 25px" src= {{ track.background }}>
-                <figcaption> {{ track.track }}, {{ track.band }} </figcaption>
+                <figcaption> <b>{{ track.track }}</b> <br> {{ track.band }} </figcaption>
             </figure>
-    {% else %}
-            К сожалению, у нас нет информации о данном треке. Попробуйте найти его в интернете!
-    {% endif %}
+            <div>
+                Должен быть скопирован следующий текст: {{ link }} <br>
+                <button class="btn btn-primary" onClick="copyToClipboard('{{link}}')">Об исполнителе</button>
+                <button class="btn btn-danger" onClick="copyToClipboard('{{link}}')">Похожие треки</button>
+                <button class="btn btn-success" onClick="copyToClipboard('{{link}}')">Поделиться</button>
 
+            </div>
+        </div>
+    {% else %}
+            К сожалению, у нас нет информации о данном треке...
+    {% endif %}
 {% endblock %}
