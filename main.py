@@ -20,6 +20,28 @@ from data.ORM.user import User
 import os
 
 
+# Список стран
+country_list = {
+    'world': 'Мир',
+    'AU': 'Австралия',
+    'AT': 'Австрия',
+    'BY': 'Беларусь',
+    'UK': 'Великобритания',
+    'DE': 'Германия',
+    'DK': 'Дания',
+    'ES': 'Испания',
+    'IT': 'Италия',
+    'CN': 'Китай',
+    'PT': 'Португалия',
+    'RU': 'Россия',
+    'US': 'США',
+    'RS': 'Сербия',
+    'FI': 'Финляндия',
+    'FR': 'Франция',
+    'CH': 'Швейцария'
+}
+
+
 # Инициализация приложения:
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'FFFFF0-JHKMQ1-KRMB89-KLLLVV-ZZHMN5'
@@ -221,11 +243,12 @@ def recognize():
 def track_info(track_id):
     """ Вернуть страницу с информацией о треке """
 
+    link = '12412412515'
     # Если трек не удалось распознать, то ничего не отправляем на вывод:
     if track_id == 0:
         return render_template('track.html')
     track = db_sess.query(Track).filter(Track.id == track_id).first()
-    return render_template('track.html', track=track)
+    return render_template('track.html', track=track, link=link)
 
 
 @app.route('/library')
@@ -236,7 +259,7 @@ def user_library():
         recognized = db_sess.query(Recognized).filter(Recognized.user_id == current_user.id).all()
 
         for i in recognized:
-            track = db_sess.query(Track).filter(Track.id == i.id).first()
+            track = db_sess.query(Track).filter(Track.id == i.track_id).first()
             library.append((track, i))
 
         return render_template('library.html', library=reversed(library))
@@ -246,7 +269,8 @@ def user_library():
 @app.route('/delete/track/<int:track_id>', methods=["GET"])
 def delete_track(track_id):
     track_to_delete = db_sess.query(Recognized).filter(Recognized.user_id == current_user.id,
-                                                       Recognized.track_id == track_id).first()
+                                                       Recognized.id == track_id).first()
+    print(track_to_delete, '----------')
     db_sess.delete(track_to_delete)
     db_sess.commit()
 
@@ -260,7 +284,7 @@ def featured():
                                                        Recognized.is_favourite == 1).all()
 
     for i in featured_tracks:
-        track = db_sess.query(Track).filter(Track.id == i.id).first()
+        track = db_sess.query(Track).filter(Track.id == i.track_id).first()
         featured_library.append((track, i))
 
     return render_template('library.html', library=reversed(featured_library))
@@ -269,7 +293,7 @@ def featured():
 @app.route('/feature/track/<int:track_id>', methods=["GET"])
 def feature_track(track_id):
     track = db_sess.query(Recognized).filter(Recognized.user_id == current_user.id,
-                                             Recognized.track_id == track_id).first()
+                                             Recognized.id == track_id).first()
     if not track.is_favourite:
         track.is_favourite = 1
     else:
@@ -311,7 +335,7 @@ def charts(country=None, genre=None):
         else:
             i['db_id'] = 0
 
-    return render_template('charts.html', top=top, country=country)
+    return render_template('charts.html', top=top, country=country_list[country])
 
 
 if __name__ == '__main__':
