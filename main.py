@@ -5,7 +5,7 @@ from flask import Flask, render_template, redirect, request, jsonify
 # Обработчики ShazamAPI
 from data.audio_handlers.recognize_handler import recognize_song, identifier
 from data.audio_handlers.charts_handler import charts_handler
-from data.audio_handlers.similiar_songs_handler import *
+from data.audio_handlers.similiar_songs_handler import get_similiar_songs
 from data.audio_handlers.about_artist_handler import get_artist_info
 
 # Форма регистрации и авторизации
@@ -174,7 +174,7 @@ def recognize():
 
         # Если определение прошло успешно, то обрабатываем полученную информацию и формируем ответ:
         # Берём данные о треке:
-        shazam_id, artist_id, track_title, band, background = track_data
+        track_key, shazam_id, artist_id, track_title, band, background = track_data
 
         # Проверяем, существует ли распознанный трек в БД:
         existing = db_sess.query(Track).filter(Track.shazam_id == shazam_id).first()
@@ -183,6 +183,7 @@ def recognize():
         # а иначе - увеличиваем количество его распознаний:
         if not existing:
             track = Track()
+            track.track_key = track_key
             track.shazam_id = shazam_id
             track.artist_id = artist_id
             track.track = track_title
@@ -200,21 +201,22 @@ def recognize():
         # распознанном треке в его библиотеку:
         if current_user.is_authenticated:
 
-            # Но если данный трек уже распознан, то просто обновляем время его распознания:
+            # Но если данный трек уже распознан, то перезаписываем информацию о нём:
             already_recognized = db_sess.query(Recognized).filter(
                 Recognized.track_id == track_id,
                 Recognized.user_id == current_user.id
             ).first()
 
             if already_recognized:
-                already_recognized.date = get_valid_date()
-            else:
-                recognized = Recognized()
-                recognized.user_id = current_user.id
-                recognized.track_id = track_id
-                recognized.is_favourite = False
+                already_recognized_copy = already_recognized
+                db_sess.delete(already_recognized)
 
-                db_sess.add(recognized)
+            recognized = Recognized()
+            recognized.user_id = current_user.id
+            recognized.track_id = track_id
+            recognized.is_favourite = False
+
+            db_sess.add(recognized)
             db_sess.commit()
 
         # Обновляем страницу:
@@ -239,6 +241,7 @@ def charts(country=None, genre=None):
 
             if not existing:
                 track = Track()
+                track.track_key = i['track_key']
                 track.shazam_id = i['shazam_id']
                 track.artist_id = i['artist_id']
                 track.track = i['track']
@@ -274,8 +277,36 @@ def track_info(track_id):
 @app.route('/similiar/track/<int:track_id>')
 def similiar_songs(track_id):
     """ Вернуть страницу с похожими на track_id песнями """
-    return render_template('similiar_songs.html')
+    track_owner = db_sess.query(Track).filter(Track.id == track_id).first()
+    track_key = track_owner.track_key
 
+    if not track_key:
+        return render_template('similiar_songs.html')
+
+    songs = get_similiar_songs(track_key)
+    similiar_tracks = list()
+
+    for i in songs:
+        track_key, track_shazam_id, artist_id, track_title, band, background = i
+        is_track_in_db = db_sess.query(Track).filter(Track.shazam_id == track_shazam_id).first()
+
+        if not is_track_in_db:
+            track = Track()
+            track.track_key = track_key
+            track.shazam_id = track_shazam_id
+            track.artist_id = artist_id
+            track.track = track_title
+            track.band = band
+            track.background = background
+            db_sess.add(track)
+            db_sess.commit()
+            similiar_tracks.append(track)
+        else:
+            track = is_track_in_db
+            similiar_tracks.append(track)
+
+    return render_template('similiar_songs.html', track_owner=track_owner,
+                           similiar_tracks=similiar_tracks)
 
 @app.route('/artist/track/<int:track_id>')
 @app.route('/artist/<int:artist_id>')
@@ -314,6 +345,7 @@ def about_artist(track_id=None, artist_id=None):
 
         if not is_track_in_db:
             track = Track()
+            track.track_key = 0  # ShazamAPI не предоставляет ключ для лучших песен артиста...
             track.shazam_id = track_shazam_id
             track.artist_id = artist_shazam_id
             track.track = track_title
@@ -331,6 +363,17 @@ def about_artist(track_id=None, artist_id=None):
 
     return render_template('about_artist.html', artist=artist, best_tracks=best_tracks[:3],
                            platform_tracks=platform_tracks, all_tracks=all_artist_tracks)
+
+
+
+
+
+
+
+
+
+
+
 
 
 @app.route('/library')

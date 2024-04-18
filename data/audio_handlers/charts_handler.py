@@ -32,21 +32,21 @@ def charts_handler(country):
     # Создание списка списков с информацией о топе:
     for i in data:
         dataset = dict()
+
+        dataset['artist_id'] = 0
         if 'artists' in i:
             dataset['artist_id'] = i['artists'][0]['adamid']
-        else:
-            dataset['artist_id'] = 0
+
+        dataset['background'] = UNKNOWN_SONG
+        if 'image' in i['share']:
+            dataset['background'] = i['share']['image']
 
         if 'actions' in i['hub']:
             dataset['shazam_id'] = i['hub']['actions'][0]['id']
 
         dataset['track'] = i['title']
         dataset['band'] = i['subtitle']
-
-        if 'image' in i['share']:
-            dataset['background'] = i['share']['image']
-        else:
-            dataset['background'] = UNKNOWN_SONG
+        dataset['track_key'] = i['key']
 
         rating.append(dataset)
     return rating

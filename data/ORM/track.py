@@ -9,7 +9,7 @@ class Track(SqlAlchemyBase, SerializerMixin):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     shazam_id = sqlalchemy.Column(sqlalchemy.Integer)  # ID песни в Shazam
-
+    track_key = sqlalchemy.Column(sqlalchemy.Integer)  # KEY (ключ) для особой работы с ShazamAPI (поиск похожих треков)
     # ID исполнителя данной песни
     artist_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("artists.shazam_id"))
     track = sqlalchemy.Column(sqlalchemy.String)  # Название песни

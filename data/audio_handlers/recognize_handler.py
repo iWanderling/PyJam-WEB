@@ -3,8 +3,7 @@
 from shazamio import Shazam
 from data.constants import *
 import asyncio
-import string
-
+from pprint import pprint
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
@@ -32,6 +31,7 @@ def recognize_song(file='file.mp3', all_info=None):
         # Если полная информация не нужна,
         # то функция вернёт название трека и исполнителя, а также ссылку альбома трека:
         if all_info is None:
+            track_key = data['track']['key']
             artist_id = data['track']['artists'][0]['adamid']
             title = data['track']['title']  # название песни
             band = data['track']['subtitle']  # название исполнителя
@@ -42,7 +42,7 @@ def recognize_song(file='file.mp3', all_info=None):
                 background = UNKNOWN_SONG
 
             # Возвращаем указанную информацию:
-            return shazam_id, artist_id, title, band, background
+            return track_key, shazam_id, artist_id, title, band, background
 
         # Возвращаем полную информацию:
         return data

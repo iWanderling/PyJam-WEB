@@ -2,5 +2,31 @@
 {% block title %} Главная {% endblock %}
 
 {% block content %}
-    <p></p>
+    {% if similiar_tracks %}
+
+        <div class="recognize-window">
+            <figure style="margin: 40px 0px;">
+                <img width="250px" height="250px" style="border-radius: 25px" src= {{ track_owner.background }}>
+                <figcaption> <b><a href="/track/{{ track_owner.id }}">{{ track_owner.track }}</a></b> <br>
+                    <a href="/artist/{{ track_owner.artist_id }}">{{ track_owner.band }}</a> </figcaption>
+            </figure>
+        <div>
+
+        <h2> Похожие треки </h2>
+        {% for track in similiar_tracks %}
+            <div class="charts-content-block">
+                <img width="125px"
+                     height="125px"
+                     class="charts-song-cover"
+                     src={{ track.background }}>
+
+                    <div style="font-weight: 500">
+                        <a href="/track/{{ track.id }}">{{ track.track }}</a><br>
+                        <a href="/artist/{{ track.artist_id }}">{{ track.band }}</a>
+                    </div>
+            </div>
+            {% endfor %}
+    {% else %}
+        К сожалению, мы не можем предоставить вам информацию об этом...
+    {% endif %}
 {% endblock %}

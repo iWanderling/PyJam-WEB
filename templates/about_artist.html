@@ -20,10 +20,10 @@
                  class="charts-song-cover"
                  src={{ track.background }}>
 
-                <div style="font-weight: 500"><a href="/track/{{ track.id }}">
-                    {{loop.index}}. {{ track.track }} <br>
-                    {{ track.band }}
-                </a></div>
+                <div style="font-weight: 500">
+                    <a href="/track/{{ track.id }}">{{ track.track }}</a> <br>
+                    <a href="/artist/{{ track.artist_id }}">{{ track.band }}</a>
+                </div>
         </div>
         {% endfor %}
 
@@ -35,10 +35,10 @@
                  class="charts-song-cover"
                  src={{ track.background }}>
 
-                <div style="font-weight: 500"><a href="/track/{{ track.id }}">
-                    {{loop.index}}. {{ track.track }} <br>
-                    {{ track.band }}
-                </a></div>
+                <div style="font-weight: 500">
+                    <a href="/track/{{ track.id }}">{{ track.track }}</a> <br>
+                    <a href="/artist/{{ track.artist_id }}">{{ track.band }}</a>
+                </div>
         </div>
         {% endfor %}
     {% else %}

@@ -1,14 +1,38 @@
-from shazamio import Shazam
 import asyncio
+from shazamio import Shazam
 from pprint import pprint
+from data.constants import *
 
-async def similiar(track_id, limit_constant=3, offset_constant=3):
-    """ Получить треки, схожие по жанру и звучанию с определённой песней
 
-        ::Параметры::
-        track_id[int] -> ID песни в Shazam
-        limit_constant[int] -> необязательный параметр; сколько похожих песен нужно получить (по умолчанию - 3)
-        offset_constant[int] -> необязательный параметр; """
+async def similiar_songs(track_key):
+    shazam = Shazam()
 
-    return await Shazam().related_tracks(track_id=track_id, limit=limit_constant,
-                                         offset=offset_constant)
+    data = await shazam.related_tracks(track_id=track_key)
+
+    related = list()
+    for i in data['tracks']:
+        track_key = i['key']
+
+        artist_id = 0
+        if 'artists' in i:
+            artist_id = i['artists'][0]['adamid']
+
+        shazam_id = 0
+        if 'actions' in i['hub']:
+            shazam_id = i['hub']['actions'][0]['id']
+
+        background = UNKNOWN_SONG
+        if 'image' in i['share']:
+            background = i['share']['image']
+
+        track = i['title']
+        band = i['subtitle']
+
+        related.append([track_key, shazam_id, artist_id, track, band, background])
+    return related
+
+def get_similiar_songs(track_key):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    return loop.run_until_complete(similiar_songs(track_key))
+

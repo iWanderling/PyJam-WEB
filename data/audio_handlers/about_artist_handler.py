@@ -1,7 +1,7 @@
 from shazamio.schemas.artists import ArtistQuery
 from shazamio.schemas.enums import ArtistView
-from shazamio import Serialize, Shazam
-
+from shazamio import Shazam
+from pprint import pprint
 from data.constants import UNKNOWN_SONG
 import asyncio
 
@@ -21,7 +21,6 @@ async def best_artist_tracks(artist_id):
     """ Функция возвращает самые популярные треки определённого исполнителя
         Примечание: на странице отображается ТОП-3 трека, и вместе с остальными треками они загружаются в БД """
     shazam = Shazam()
-
     about_artist = await shazam.artist_about(artist_id,
                                              query=ArtistQuery(views=[ArtistView.TOP_SONGS]))
     return about_artist
@@ -57,6 +56,7 @@ async def artist_info(artist_id):
                 track_id = i['id']
             except KeyError:
                 track_id = 0
+
             track = i['attributes']  # информация о треке
             title = track['name']  # название трека
             band = artist_name  # название исполнителя

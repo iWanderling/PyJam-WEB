@@ -50,11 +50,9 @@
                          class="charts-song-cover"
                          src={{ i.background }}>
 
-                    <div style="font-weight: 500"><a href="/charts/track/{{ i.db_id }}">
-                        {{ i.track }}
-                    </a></div>
-
-                    {{ i.band }}
+                    <div style="font-weight: 500"><a href="/charts/track/{{ i.db_id }}">{{ i.track }}</a><br>
+                    <a href="/artist/{{ i.artist_id }}">{{ i.band }}</a>
+                    </div>
                 </div>
             </div>
         {% endfor %}
@@ -72,11 +70,10 @@
                          class="charts-song-cover"
                          src={{ i.background }}>
 
-                    <div style="font-weight: 500"><a href="/charts/track/{{ i.db_id }}">
-                        {{loop.index + 3}}. {{ i.track }}
-                    </a></div>
-
-                    {{ i.band }}
+                    <div style="font-weight: 500">
+                        <a href="/charts/track/{{ i.db_id }}">{{loop.index + 3}}. {{ i.track }}</a><br>
+                        <a href="/artist/{{ i.artist_id }}">{{ i.band }}</a>
+                    </div>
                 </div>
             </div>
         {% endfor %}
