@@ -5,6 +5,8 @@ from flask import Flask, render_template, redirect, request, jsonify
 # Обработчики ShazamAPI
 from data.audio_handlers.recognize_handler import recognize_song, identifier
 from data.audio_handlers.charts_handler import charts_handler, UNKNOWN_SONG
+from data.audio_handlers.similiar_songs_handler import *
+from data.audio_handlers.about_artist_handler import *
 
 # Форма регистрации и авторизации
 from data.forms.register_form import RegisterForm
@@ -13,33 +15,15 @@ from data.forms.login_form import LoginForm
 # ORM-модели
 from data.ORM import db_session
 from data.ORM.recognized import Recognized, get_valid_date
+from data.ORM.artist import Artist
 from data.ORM.track import Track
 from data.ORM.user import User
 
+# Константы
+from data.constants import *
+
 # Для удаления загруженных на сервер файлов
 import os
-
-
-# Список стран
-country_list = {
-    'world': 'Мир',
-    'AU': 'Австралия',
-    'AT': 'Австрия',
-    'BY': 'Беларусь',
-    'UK': 'Великобритания',
-    'DE': 'Германия',
-    'DK': 'Дания',
-    'ES': 'Испания',
-    'IT': 'Италия',
-    'CN': 'Китай',
-    'PT': 'Португалия',
-    'RU': 'Россия',
-    'US': 'США',
-    'RS': 'Сербия',
-    'FI': 'Финляндия',
-    'FR': 'Франция',
-    'CH': 'Швейцария'
-}
 
 
 # Инициализация приложения:
@@ -184,14 +168,13 @@ def recognize():
         # Распознавание песни:
         track_data = recognize_song(file_path)
         os.remove(file_path)
-
         # Если программа не смогла определить трек, то уведомляем пользователя об этом:
         if track_data is None:
             return redirect('/recognize/track/0')
 
         # Если определение прошло успешно, то обрабатываем полученную информацию и формируем ответ:
         # Берём данные о треке:
-        shazam_id, track_title, band, background = track_data
+        shazam_id, artist_id, track_title, band, background = track_data
 
         # Проверяем, существует ли распознанный трек в БД:
         existing = db_sess.query(Track).filter(Track.shazam_id == shazam_id).first()
@@ -201,6 +184,7 @@ def recognize():
         if not existing:
             track = Track()
             track.shazam_id = shazam_id
+            track.artist_id = artist_id
             track.track = track_title
             track.band = band
             track.background = background
@@ -237,6 +221,42 @@ def recognize():
         return redirect(f'/recognize/track/{track_id}')
 
 
+@app.route('/Charts/<country>/<genre>', methods=["GET", "POST"])
+@app.route('/charts/<country>', methods=["GET", "POST"])
+@app.route('/charts', methods=["GET", "POST"])
+def charts(country=None, genre=None):
+    """ Данная функция позволяет пользователю ознакомиться с мировым хит-парадом песен """
+
+    # Возвращаем мировой топ, если не введены параметры в адрес:
+    if country is None and genre is None:
+        return redirect('/charts/world')
+
+    top = charts_handler(country=country)
+
+    for i in top:
+        if 'shazam_id' in i:
+            existing = db_sess.query(Track).filter(Track.shazam_id == i['shazam_id']).first()
+
+            if not existing:
+                track = Track()
+                track.shazam_id = i['shazam_id']
+                track.artist_id = i['artist_id']
+                track.track = i['track']
+                track.band = i['band']
+                track.background = i['background']
+                track.popularity = 0
+                db_sess.add(track)
+                db_sess.commit()
+
+                i['db_id'] = track.id
+            else:
+                i['db_id'] = db_sess.query(Track).filter(Track.shazam_id == i['shazam_id']).first().id
+        else:
+            i['db_id'] = 0
+
+    return render_template('charts.html', top=top, country=country_list[country])
+
+
 @app.route('/recognize/track/<int:track_id>')
 @app.route('/charts/track/<int:track_id>')
 @app.route('/track/<int:track_id>')
@@ -249,6 +269,18 @@ def track_info(track_id):
         return render_template('track.html')
     track = db_sess.query(Track).filter(Track.id == track_id).first()
     return render_template('track.html', track=track, link=link)
+
+
+@app.route('/similiar/track/<int:track_id>')
+def similiar_songs(track_id):
+    """ Вернуть страницу с похожими на track_id песнями """
+    return render_template('similiar_songs.html')
+
+
+@app.route('/artist/track/<int:track_id>')
+def about_artist(track_id):
+    """ Вернуть страницу с информацией об исполнителе трека """
+    return render_template('about_artist.html')
 
 
 @app.route('/library')
@@ -301,41 +333,6 @@ def feature_track(track_id):
 
     db_sess.commit()
     return redirect('/library')
-
-
-@app.route('/Charts/<country>/<genre>', methods=["GET", "POST"])
-@app.route('/charts/<country>', methods=["GET", "POST"])
-@app.route('/charts', methods=["GET", "POST"])
-def charts(country=None, genre=None):
-    """ Данная функция позволяет пользователю ознакомиться с мировым хит-парадом песен """
-
-    # Возвращаем мировой топ, если не введены параметры в адрес:
-    if country is None and genre is None:
-        return redirect('/charts/world')
-
-    top = charts_handler(country=country)
-
-    for i in top:
-        if 'shazam_id' in i:
-            existing = db_sess.query(Track).filter(Track.shazam_id == i['shazam_id']).first()
-
-            if not existing:
-                track = Track()
-                track.shazam_id = i['shazam_id']
-                track.track = i['track']
-                track.band = i['band']
-                track.background = i['background']
-                track.popularity = 0
-                db_sess.add(track)
-                db_sess.commit()
-
-                i['db_id'] = track.id
-            else:
-                i['db_id'] = db_sess.query(Track).filter(Track.shazam_id == i['shazam_id']).first().id
-        else:
-            i['db_id'] = 0
-
-    return render_template('charts.html', top=top, country=country_list[country])
 
 
 if __name__ == '__main__':

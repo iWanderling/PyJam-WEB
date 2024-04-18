@@ -42,6 +42,6 @@ class Recognized(SqlAlchemyBase, SerializerMixin):
     date = sqlalchemy.Column(sqlalchemy.String, default=get_valid_date)  # Время распознания
     is_favourite = sqlalchemy.Column(sqlalchemy.Boolean)  # Избранная ли песня
 
-    # Связываемся с таблицей Users:
+    # Связываемся с таблицей Users и Tracks:
     user = orm.relationship('User')
     track = orm.relationship('Track')

@@ -17,9 +17,9 @@
                 <figcaption> <b>{{ track.track }}</b> <br> {{ track.band }} </figcaption>
             </figure>
             <div>
-                Должен быть скопирован следующий текст: {{ link }} <br>
-                <button class="btn btn-primary" onClick="copyToClipboard('{{link}}')">Об исполнителе</button>
-                <button class="btn btn-danger" onClick="copyToClipboard('{{link}}')">Похожие треки</button>
+                Должен быть скопирован следующий текст: {{ link }} (Если скопировался, значит, работает, напишешь мне) <br>
+                <a class="btn btn-primary" href="/artist/track/{{ track.id }}">Об исполнителе</a>
+                <a class="btn btn-danger" href="/similiar/track/{{ track.id }}">Похожие треки</a>
                 <button class="btn btn-success" onClick="copyToClipboard('{{link}}')">Поделиться</button>
 
             </div>

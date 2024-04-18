@@ -42,6 +42,7 @@ def recognize_song(file='file.mp3', all_info=None):
         # Если полная информация не нужна,
         # то функция вернёт название трека и исполнителя, а также ссылку альбома трека:
         if all_info is None:
+            artist_id = data['track']['artists'][0]['adamid']
             title = data['track']['title']  # название песни
             band = data['track']['subtitle']  # название исполнителя
             shazam_id = data['matches'][0]['id']  # ID песни в Shazam
@@ -51,7 +52,7 @@ def recognize_song(file='file.mp3', all_info=None):
                 background = UNKNOWN_SONG
 
             # Возвращаем указанную информацию:
-            return shazam_id, title, band, background
+            return shazam_id, artist_id, title, band, background
 
         # Возвращаем полную информацию:
         return data
@@ -59,5 +60,3 @@ def recognize_song(file='file.mp3', all_info=None):
     # Если распознать трек не удалось, то возвращаем None:
     except KeyError:
         return None
-
-

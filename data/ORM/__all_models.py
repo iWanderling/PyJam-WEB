@@ -1,1 +1,1 @@
-from data.ORM import track, user, recognized
+from data.ORM import track, user, recognized, artist
