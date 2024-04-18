@@ -4,9 +4,9 @@ from flask import Flask, render_template, redirect, request, jsonify
 
 # Обработчики ShazamAPI
 from data.audio_handlers.recognize_handler import recognize_song, identifier
-from data.audio_handlers.charts_handler import charts_handler
 from data.audio_handlers.similiar_songs_handler import get_similiar_songs
 from data.audio_handlers.about_artist_handler import get_artist_info
+from data.audio_handlers.charts_handler import charts_handler
 
 # Форма регистрации и авторизации
 from data.forms.register_form import RegisterForm
@@ -223,9 +223,9 @@ def recognize():
         return redirect(f'/recognize/track/{track_id}')
 
 
-@app.route('/Charts/<country>/<genre>', methods=["GET", "POST"])
-@app.route('/charts/<country>', methods=["GET", "POST"])
-@app.route('/charts', methods=["GET", "POST"])
+@app.route('/charts/<country>/<genre>')
+@app.route('/charts/<country>')
+@app.route('/charts')
 def charts(country=None, genre=None):
     """ Данная функция позволяет пользователю ознакомиться с мировым хит-парадом песен """
 
@@ -233,7 +233,7 @@ def charts(country=None, genre=None):
     if country is None and genre is None:
         return redirect('/charts/world')
 
-    top = charts_handler(country=country)
+    top = charts_handler(country=country, genre=genre)
 
     for i in top:
         if 'shazam_id' in i:
@@ -257,7 +257,12 @@ def charts(country=None, genre=None):
         else:
             i['db_id'] = 0
 
-    return render_template('charts.html', top=top, country=country_list[country])
+    if genre is None:
+        genre = 'Все жанры'
+
+    available_genres = AVAILABLE_GENRES[country]
+    return render_template('charts.html', top=top, available_genres=available_genres, country=country_list[country],
+                           country_code=country, genres_list=genres_list, genre_type=genres_list[genre])
 
 
 @app.route('/recognize/track/<int:track_id>')
@@ -363,17 +368,6 @@ def about_artist(track_id=None, artist_id=None):
 
     return render_template('about_artist.html', artist=artist, best_tracks=best_tracks[:3],
                            platform_tracks=platform_tracks, all_tracks=all_artist_tracks)
-
-
-
-
-
-
-
-
-
-
-
 
 
 @app.route('/library')

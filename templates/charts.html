@@ -29,6 +29,16 @@
                 <a class="dropdown-item" href="/charts/CH">Швейцария</a>
             </div>
         </div>
+        <div class="dropdown">
+            <button class="btn btn-danger dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{ genre_type }}
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            {% for genre in available_genres %}
+                <a class="dropdown-item" href="/charts/{{country_code}}/{{ genre }}">{{ genres_list[genre] }}</a>
+            {% endfor %}
+            </div>
+        </div>
     </div>
 
     <div class="row">
