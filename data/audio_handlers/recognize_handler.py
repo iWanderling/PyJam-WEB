@@ -1,22 +1,12 @@
 """ Модуль позволяет распознать практически любой аудиофайл, отправленный пользователем сайта
    (примечание: необходимо использование ffmpeg.exe последней версии) """
-from pprint import pprint
 from shazamio import Shazam
-from random import choice
+from data.constants import *
 import asyncio
 import string
 
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-UNKNOWN_SONG = "https://i1.sndcdn.com/artworks-000417448131-gof0f8-t500x500.jpg"
-
-
-def identifier():
-    """ Создаёт уникальное имя для файла, который нужно распознать.
-        Предотвращает распознавание чужого файла (например, в ситуации, где 2 пользователя
-        одновременно распознают разные файлы и их нужно распознать по отдельности) """
-    abc = string.ascii_lowercase + string.ascii_uppercase + string.digits
-    return ''.join([choice(abc) for _ in range(17)]) + '.mp3'
 
 
 async def main(file: str):

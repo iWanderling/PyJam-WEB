@@ -4,9 +4,9 @@ from flask import Flask, render_template, redirect, request, jsonify
 
 # Обработчики ShazamAPI
 from data.audio_handlers.recognize_handler import recognize_song, identifier
-from data.audio_handlers.charts_handler import charts_handler, UNKNOWN_SONG
+from data.audio_handlers.charts_handler import charts_handler
 from data.audio_handlers.similiar_songs_handler import *
-from data.audio_handlers.about_artist_handler import *
+from data.audio_handlers.about_artist_handler import get_artist_info
 
 # Форма регистрации и авторизации
 from data.forms.register_form import RegisterForm
@@ -278,9 +278,59 @@ def similiar_songs(track_id):
 
 
 @app.route('/artist/track/<int:track_id>')
-def about_artist(track_id):
+@app.route('/artist/<int:artist_id>')
+def about_artist(track_id=None, artist_id=None):
     """ Вернуть страницу с информацией об исполнителе трека """
-    return render_template('about_artist.html')
+
+    if artist_id is None:
+        track = db_sess.query(Track).filter(Track.id == track_id).first()
+        artist_shazam_id = track.artist_id
+    else:
+        artist_shazam_id = artist_id
+
+    artist_existing = db_sess.query(Artist).filter(Artist.shazam_id == artist_shazam_id).first()
+
+    if not artist_existing:
+        try:
+            all_artist_info = get_artist_info(artist_shazam_id)
+        except KeyError:
+            return render_template('about_artist.html')
+
+        artist_shazam_id, artist_title, genre, background = all_artist_info[0][:4]
+        artist = Artist()
+        artist.shazam_id = artist_shazam_id
+        artist.artist = artist_title
+        artist.genre = genre
+        artist.background = background
+        db_sess.add(artist)
+        db_sess.commit()
+
+    artist = db_sess.query(Artist).filter(Artist.shazam_id == artist_shazam_id).first()
+    best_artist_tracks = get_artist_info(artist_shazam_id)[1]
+    best_tracks = list()
+    for i in best_artist_tracks:
+        track_shazam_id, track_title, band, background = i
+        is_track_in_db = db_sess.query(Track).filter(Track.shazam_id == track_shazam_id).first()
+
+        if not is_track_in_db:
+            track = Track()
+            track.shazam_id = track_shazam_id
+            track.artist_id = artist_shazam_id
+            track.track = track_title
+            track.band = band
+            track.background = background
+            db_sess.add(track)
+            db_sess.commit()
+            best_tracks.append(track)
+        else:
+            track = is_track_in_db
+            best_tracks.append(track)
+
+    all_artist_tracks = db_sess.query(Track).filter(Track.artist_id == artist_shazam_id).all()
+    platform_tracks = len(all_artist_tracks)
+
+    return render_template('about_artist.html', artist=artist, best_tracks=best_tracks[:3],
+                           platform_tracks=platform_tracks, all_tracks=all_artist_tracks)
 
 
 @app.route('/library')

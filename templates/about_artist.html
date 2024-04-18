@@ -1,6 +1,47 @@
 {% extends "base.html" %}
-{% block title %} Главная {% endblock %}
+{% block title %} Распознать песню {% endblock %}
 
 {% block content %}
-    <p></p>
+    {% if artist %}
+        <div class="recognize-window">
+            <figure style="margin: 40px 0px;">
+                <img width="250px" height="250px" style="border-radius: 25px" src= {{ artist.background }}>
+                <figcaption> <b>{{ artist.artist }}</b> <br> Жанр: {{ artist.genre }} <br>
+                    Количество треков на платформе: {{ platform_tracks }}
+                </figcaption>
+            </figure>
+        </div>
+
+        <h2> Лучшие песни исполнителя </h2>
+        {% for track in best_tracks %}
+        <div class="charts-content-block">
+            <img width="125px"
+                 height="125px"
+                 class="charts-song-cover"
+                 src={{ track.background }}>
+
+                <div style="font-weight: 500"><a href="/track/{{ track.id }}">
+                    {{loop.index}}. {{ track.track }} <br>
+                    {{ track.band }}
+                </a></div>
+        </div>
+        {% endfor %}
+
+        <h2> Все песни на исполнителя на платформе</h2>
+        {% for track in all_tracks %}
+        <div class="charts-content-block">
+            <img width="125px"
+                 height="125px"
+                 class="charts-song-cover"
+                 src={{ track.background }}>
+
+                <div style="font-weight: 500"><a href="/track/{{ track.id }}">
+                    {{loop.index}}. {{ track.track }} <br>
+                    {{ track.band }}
+                </a></div>
+        </div>
+        {% endfor %}
+    {% else %}
+            К сожалению, у нас нет информации о данном исполнителе...
+    {% endif %}
 {% endblock %}

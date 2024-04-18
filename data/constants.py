@@ -1,4 +1,15 @@
-# Список стран
+from random import choice
+
+
+def identifier():
+    """ Создаёт уникальное имя для файла, который нужно распознать.
+        Предотвращает распознавание чужого файла (например, в ситуации, где 2 пользователя
+        одновременно распознают разные файлы и их нужно распознать по отдельности) """
+    abc = string.ascii_lowercase + string.ascii_uppercase + string.digits
+    return ''.join([choice(abc) for _ in range(17)]) + '.mp3'
+
+
+# Список стран и их кодов:
 country_list = {
     'world': 'Мир',
     'AU': 'Австралия',

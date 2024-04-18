@@ -18,7 +18,8 @@ def artwork_handler(artwork):
 
 
 async def best_artist_tracks(artist_id):
-    """ Функция возвращает самые популярные треки определённого исполнителя (ТОП-3) """
+    """ Функция возвращает самые популярные треки определённого исполнителя
+        Примечание: на странице отображается ТОП-3 трека, и вместе с остальными треками они загружаются в БД """
     shazam = Shazam()
 
     about_artist = await shazam.artist_about(artist_id,
@@ -36,12 +37,17 @@ async def artist_info(artist_id):
     if about_artist:
         about_artist = about_artist['data'][0]['attributes']
         artist_name = about_artist['name']  # Название исполнителя
-        artist_genre = about_artist['genreNames'][0]  # Жанр исполнителя
+
+        try:
+            artist_genre = about_artist['genreNames'][0]  # Жанр исполнителя
+        except IndexError:
+            artist_genre = 'Неизвестен'
+
         artist_artwork = about_artist['artwork']  # [Артворк] с данными об изображении исполнителя
         artist_background = artwork_handler(artist_artwork)  # Ссылка на изображение
 
         artist_best = await best_artist_tracks(artist_id)  # Возвращаем информацию с лучшими треками исполнителя
-        artist_best = artist_best['data'][0]['views']['top-songs']['data'][:3]  # Берём первые 3 песни
+        artist_best = artist_best['data'][0]['views']['top-songs']['data']
 
         artist_best_tracks = list()
 
@@ -63,3 +69,9 @@ async def artist_info(artist_id):
                 artist_best_tracks)
     return None
 
+def get_artist_info(artist_id):
+    """ Обработчик функции get_artist """
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    return loop.run_until_complete(artist_info(artist_id))
