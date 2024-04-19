@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %} Главная {% endblock %}
+
+{% block content %}
+    <h2> Здравствуйте, {{current_user.name}}! </h2>
+
+    <h2> За всё время на платформе вы распознали {{ rec_count }} уникальных треков </h2>
+
+    <a class="btn btn-success" href="/cabinet/user/{{current_user.id}}/edit"> Редактировать данные </a>
+{% endblock %}

@@ -41,7 +41,7 @@
             <a class="navbar-brand {% if active_page == 'recognize' %}active{% endif %}" href="/recognize"> Распознать </a>
             {% if current_user.is_authenticated %}
                 <a class="navbar-brand {% if active_page == 'library' %}active{% endif %}" href="/library"> Библиотека </a>
-                <a class="navbar-brand" href="/logout">Выйти</a>
+                <a class="navbar-brand" href="/cabinet/user/{{ current_user.id }}"> Личный Кабинет </a>
             {% else %}
                 <a class="navbar-brand {% if active_page == 'login' %}active{% endif %}" href="/login"> Войти </a>
             {% endif %}

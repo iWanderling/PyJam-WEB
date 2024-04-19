@@ -422,6 +422,17 @@ def feature_track(track_id):
     return redirect('/library')
 
 
+@app.route('/cabinet/user/<int:user_id>')
+def cabinet(user_id):
+    user_recognized_count = len(db_sess.query(Recognized).filter(Recognized.user_id == user_id).all())
+    return render_template('cabinet.html', rec_count=user_recognized_count)
+
+
+@app.route('/cabinet/user/<int:user_id>/edit')
+def edit_cabinet(user_id):
+    return render_template('cabinet_edit.html')
+
+
 if __name__ == '__main__':
     db_session.global_init("db/PyJam.db")
     db_sess = db_session.create_session()
