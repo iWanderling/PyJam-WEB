@@ -2,9 +2,17 @@
 {% block title %} Главная {% endblock %}
 
 {% block content %}
-    <h2> Здравствуйте, {{current_user.name}}! </h2>
+    {% if current_user.is_authenticated %}
+        <h2> Здравствуйте, {{current_user.name}}! </h2>
 
-    <h2> За всё время на платформе вы распознали {{ rec_count }} уникальных треков </h2>
+        {% if rec_count %}
+            <h2> За всё время на платформе вы распознали уникальных треков: {{ rec_count }}</h2>
+        {% else %}
+            <h2> Вы ещё не распознали ни одного трека. Самое время начать!</h2>
+        {% endif %}
 
-    <a class="btn btn-success" href="/cabinet/user/{{current_user.id}}/edit"> Редактировать данные </a>
+        <a class="btn btn-success" href="/cabinet/edit"> Редактировать данные </a>
+    {% else %}
+        <h2> Авторизуйтесь, чтобы получить доступ к своему личному кабинету! </h2>
+    {% endif %}
 {% endblock %}
