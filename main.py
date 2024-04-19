@@ -11,6 +11,7 @@ from data.audio_handlers.charts_handler import charts_handler
 # Форма регистрации и авторизации
 from data.forms.register_form import RegisterForm
 from data.forms.login_form import LoginForm
+from data.forms.user_form import UserForm
 
 # ORM-модели
 from data.ORM import db_session
@@ -422,14 +423,48 @@ def feature_track(track_id):
     return redirect('/library')
 
 
-@app.route('/cabinet/user/<int:user_id>')
-def cabinet(user_id):
-    user_recognized_count = len(db_sess.query(Recognized).filter(Recognized.user_id == user_id).all())
-    return render_template('cabinet.html', rec_count=user_recognized_count)
+@app.route('/cabinet')
+def cabinet():
+    if current_user.is_authenticated:
+        user_recognized_count = len(db_sess.query(Recognized).filter(Recognized.user_id == current_user.id).all())
+        return render_template('cabinet.html', rec_count=user_recognized_count)
+    return render_template('cabinet.html')
 
 
-@app.route('/cabinet/user/<int:user_id>/edit')
-def edit_cabinet(user_id):
+@app.route('/cabinet/edit', methods=['GET', 'POST'])
+def edit_cabinet():
+
+    if current_user.is_authenticated:
+        form = UserForm()
+        UserForm.email.data = current_user.email
+        UserForm.surname.data = current_user.surname
+        UserForm.name.data = current_user.name
+
+        if form.validate_on_submit():
+            if any([len(form.new_password.data) <= 9, form.new_password.data.isdigit()]):
+                return render_template('cabinet_edit.html', form=form,
+                                       message="Пароль содержит менее 9 символов или содержит только цифры")
+
+            if form.new_password.data != form.new_password_again.data:
+                return render_template('cabinet_edit.html', form=form,
+                                       message="Пароли не совпадают")
+
+            db_sess = db_session.create_session()
+            is_user_already_exists = db_sess.query(User).filter(User.email == form.email.data).first()
+            if is_user_already_exists:
+                return render_template('cabinet_edit.html', form=form,
+                                       message="Такой пользователь уже существует")
+
+            user = db_sess.query(User).filter(User.id == current_user.id).first()
+            user.email = form.email.data
+            user.surname = form.surname.data
+            user.name = form.name.data
+
+            user.set_password(form.new_password.data)
+            db_sess.commit()
+            print(current_user.name)
+            return redirect('/cabinet')
+        return render_template('cabinet_edit.html', form=form)
     return render_template('cabinet_edit.html')
 
 
