@@ -2,31 +2,53 @@
 {% block title %} Главная {% endblock %}
 
 {% block content %}
-    {% if similiar_tracks %}
-
-        <div class="recognize-window">
-            <figure style="margin: 40px 0px;">
-                <img width="250px" height="250px" style="border-radius: 25px" src= {{ track_owner.background }}>
-                <figcaption> <b><a href="/track/{{ track_owner.id }}">{{ track_owner.track }}</a></b> <br>
-                    <a href="/artist/{{ track_owner.artist_id }}">{{ track_owner.band }}</a> </figcaption>
-            </figure>
-        <div>
-
-        <h2> Похожие треки </h2>
+{% if similiar_tracks %}
+<div class="recognize-window">
+    <figure style="margin: 40px 0px; display: flex;">
+        <img width="250px" height="250px" style="border-radius: 25px;" src={{ track_owner.background }}>
+        <figcaption style="margin-left: 20px; align-self: flex-start;">
+            <b><a href="/track/{{ track_owner.id }}" style="font-size: 30px; color: #007bff;">{{ track_owner.track
+                }}</a></b> <br>
+            <a href="/artist/{{ track_owner.artist_id }}" style="font-size: 18px; color: black;">{{ track_owner.band
+                }}</a>
+        </figcaption>
+    </figure>
+</div>
+<div>
+    <h2 class="animated-text" style="font-family: 'Open Sans', font-size: 50px;"> Похожие треки </h2>
+    <div class="row">
         {% for track in similiar_tracks %}
-            <div class="charts-content-block">
-                <img width="125px"
-                     height="125px"
+        <div class="col-md-3">
+            <div class="charts-content-block" style="overflow: hidden;">
+                <img width="200px"
+                     height="200px"
                      class="charts-song-cover"
                      src={{ track.background }}>
-
-                    <div style="font-weight: 500">
-                        <a href="/track/{{ track.id }}">{{ track.track }}</a><br>
-                        <a href="/artist/{{ track.artist_id }}">{{ track.band }}</a>
-                    </div>
+                <div style="font-weight: 500; margin-top: 15px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <a href="/track/{{ track.id }}">{{ track.track }}</a><br>
+                    <a href="/artist/{{ track.artist_id }}">{{ track.band }}</a>
+                </div>
             </div>
-            {% endfor %}
+        </div>
+        {% if loop.index % 4 == 0 %}
+    </div>
+    <div class="row">
+        {% endif %}
+        {% endfor %}
+    </div>
     {% else %}
-        К сожалению, мы не можем предоставить вам информацию об этом...
+    <p class="animated-text">К сожалению, мы не можем предоставить вам информацию об этом...</p>
     {% endif %}
-{% endblock %}
+
+    <style>
+        @keyframes slideIn {
+            0% { transform: translateY(-50px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .animated-text {
+            animation: slideIn 0.5s ease-out;
+        }
+    </style>
+    {% endblock %}
+</div>
