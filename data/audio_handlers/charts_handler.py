@@ -1,8 +1,6 @@
 """ Модуль позволяет получить самую популярную во всём мире музыку / песню """
 from shazamio import Shazam, GenreMusic
-from shazamio.exceptions import FailedDecodeJson
-from data.constants import UNKNOWN_SONG, LIMIT_CONSTANT
-from pprint import pprint
+from data.system_files.constants import UNKNOWN_SONG, LIMIT_CONSTANT
 import asyncio
 
 

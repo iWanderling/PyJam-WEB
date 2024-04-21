@@ -1,6 +1,8 @@
 # Модули для работы с Flask
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask import Flask, render_template, redirect, request, url_for
+from urllib.parse import urlparse
+import asyncio
 
 # Обработчики ShazamAPI
 from data.audio_handlers.similiar_songs_handler import get_similiar_songs
@@ -22,8 +24,9 @@ from data.ORM.artist import Artist
 from data.ORM.track import Track
 from data.ORM.user import User
 
-# Константы
-from data.constants import *
+# Константы и системные функции
+from data.system_files.image_downloader import download_image_handler
+from data.system_files.constants import *
 
 # Для удаления загруженных на сервер файлов
 import os
@@ -182,16 +185,19 @@ def recognize():
 
     # Если пользователь ничего не отправил - возвращаем обычную страницу
     if request.method == "GET":
-        return render_template('/nav_pages/recognize.html', background=UNKNOWN_SONG)
+        background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
+        return render_template('/nav_pages/recognize.html', background=background)
 
     # Если пользователь отправил файл на распознание, то возвращаем пользователю информацию о распознанном треке:
     elif request.method == "POST":
+        background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
 
         # Загружаем отправленный пользователем файл, если пользователь ничего не отправил - перезагружаем страницу:
         f = request.files['file']
         if not f.filename:
-            return render_template('/nav_pages/recognize.html', message='Вы не отправили файл', background=UNKNOWN_SONG)
-        file_path = 'static/music/' + identifier()
+            return render_template('/nav_pages/recognize.html', message='Вы не отправили файл', background=background)
+
+        file_path = 'static/music/' + identifier(format_='.mp3')
         f.save(file_path)
 
         # Распознавание песни:
@@ -207,6 +213,7 @@ def recognize():
 
         # Проверяем, существует ли распознанный трек в БД:
         existing = db_sess.query(Track).filter(Track.shazam_id == shazam_id).first()
+        background_to_download = []
 
         # Если трека ещё нет в БД, то записываем информацию о нём,
         # а иначе - увеличиваем количество его распознаний:
@@ -217,10 +224,18 @@ def recognize():
             track.artist_id = artist_id
             track.track = track_title
             track.band = band
-            track.background = background
+
+            if background == UNKNOWN_SONG:
+                track.background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
+            else:
+                filename = identifier(format_=".png")
+                track.background = url_for('static', filename=f'img/track/{filename}')
+                background_to_download.append([filename, background])
+
             db_sess.add(track)
             db_sess.commit()
             track_id = track.id
+            asyncio.run(download_image_handler(background_to_download, 'track'))
         else:
             existing.popularity += 1
             track_id = existing.id
@@ -268,9 +283,11 @@ def charts(country=None, genre=None):
     if country is None and genre is None:
         return redirect('/charts/world')
 
-    top = charts_handler(country=country, genre=genre)
+    data = charts_handler(country=country, genre=genre)
+    background_to_download = list()
+    top = list()
 
-    for i in top:
+    for i in data:
         if 'shazam_id' in i:
             existing = db_sess.query(Track).filter(Track.shazam_id == i['shazam_id']).first()
 
@@ -281,21 +298,40 @@ def charts(country=None, genre=None):
                 track.artist_id = i['artist_id']
                 track.track = i['track']
                 track.band = i['band']
-                track.background = i['background']
                 track.popularity = 0
+
+                if i['background'] == UNKNOWN_SONG:
+                    track.background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
+                else:
+                    filename = identifier(format_=".png")
+                    track.background = url_for('static', filename=f'img/track/{filename}')
+                    background_to_download.append([filename, i['background']])
+
                 db_sess.add(track)
                 db_sess.commit()
+                top.append(track)
 
-                i['db_id'] = track.id
             else:
-                i['db_id'] = db_sess.query(Track).filter(Track.shazam_id == i['shazam_id']).first().id
+                top.append(db_sess.query(Track).filter(Track.shazam_id == i['shazam_id']).first())
         else:
-            i['db_id'] = 0
+            none_track = Track()
+            none_track.id = 0
+            none_track.track_key = 0
+            none_track.shazam_id = 0
+            none_track.artist_id = 0
+            none_track.track = i['track']
+            none_track.band = i['band']
+            none_track.background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
+            none_track.popularity = 0
+            top.append(none_track)
 
     if genre is None:
         genre = 'Все жанры'
 
     available_genres = AVAILABLE_GENRES[country]
+
+    if background_to_download:
+        asyncio.run(download_image_handler(background_to_download, 'track'))
     return render_template('/nav_pages/charts.html', top=top, available_genres=available_genres,
                            country=country_list[country], country_code=country, genres_list=genres_list,
                            genre_type=genres_list[genre])
@@ -307,10 +343,14 @@ def charts(country=None, genre=None):
 def track_info(track_id):
     """ Вернуть страницу с информацией о треке """
 
-    link = '12412412515'
+    o = urlparse(request.base_url)
+    hostname = o.hostname
+
+    link = f'{o.netloc}/track/{track_id}'
     # Если трек не удалось распознать, то ничего не отправляем на вывод:
     if track_id == 0:
         return render_template('/information_pages/track.html')
+
     track = db_sess.query(Track).filter(Track.id == track_id).first()
     return render_template('/information_pages/track.html', track=track, link=link)
 
@@ -328,6 +368,8 @@ def similiar_songs(track_id):
     similiar_tracks = list()
 
     for i in songs:
+        background_to_download = []
+
         track_key, track_shazam_id, artist_id, track_title, band, background = i
         is_track_in_db = db_sess.query(Track).filter(Track.shazam_id == track_shazam_id).first()
 
@@ -338,7 +380,14 @@ def similiar_songs(track_id):
             track.artist_id = artist_id
             track.track = track_title
             track.band = band
-            track.background = background
+
+            if background == UNKNOWN_SONG:
+                track.background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
+            else:
+                filename = identifier(format_=".png")
+                track.background = url_for('static', filename=f'img/track/{filename}')
+                background_to_download.append([filename, background])
+
             db_sess.add(track)
             db_sess.commit()
             similiar_tracks.append(track)
@@ -346,25 +395,34 @@ def similiar_songs(track_id):
             track = is_track_in_db
             similiar_tracks.append(track)
 
+        asyncio.run(download_image_handler(background_to_download, 'track'))
     # В список может загрузиться несколько одинаковых песен, поэтому, избавляемся от дубликатов:
     similiar_tracks = list(set(similiar_tracks))
     return render_template('/information_pages/similiar_songs.html', track_owner=track_owner,
                            similiar_tracks=similiar_tracks)
 
-@app.route('/artist/track/<int:track_id>')
-@app.route('/artist/<int:artist_id>')
-def about_artist(track_id=None, artist_id=None):
-    """ Вернуть страницу с информацией об исполнителе трека """
 
-    if artist_id is None:
-        track = db_sess.query(Track).filter(Track.id == track_id).first()
-        artist_shazam_id = track.artist_id
-    else:
-        artist_shazam_id = artist_id
+@app.route('/artist/track/<int:track_id>')
+def track_to_artist(track_id):
+    track = db_sess.query(Track).filter(Track.id == track_id).first()
+    artist_shazam_id = track.artist_id
+    return redirect(f'/artist/{artist_shazam_id}')
+
+
+@app.route('/artist/<int:artist_id>')
+def about_artist(artist_id):
+    """ Вернуть страницу с информацией об исполнителе трека """
+    artist_shazam_id = artist_id
+
+    o = urlparse(request.base_url)
+    hostname = o.hostname
+    link = f'{o.netloc}/artist/{artist_shazam_id}'
 
     artist_existing = db_sess.query(Artist).filter(Artist.shazam_id == artist_shazam_id).first()
 
     if not artist_existing:
+        background_to_download = []
+
         try:
             all_artist_info = get_artist_info(artist_shazam_id)
         except KeyError:
@@ -375,13 +433,23 @@ def about_artist(track_id=None, artist_id=None):
         artist.shazam_id = artist_shazam_id
         artist.artist = artist_title
         artist.genre = genre
-        artist.background = background
+
+        if background == UNKNOWN_SONG:
+            artist.background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
+        else:
+            filename = identifier(format_=".png")
+            artist.background = url_for('static', filename=f'img/artist/{filename}')
+            background_to_download.append([filename, background])
+
         db_sess.add(artist)
         db_sess.commit()
+        asyncio.run(download_image_handler(
+            background_to_download, 'artist'))
 
     artist = db_sess.query(Artist).filter(Artist.shazam_id == artist_shazam_id).first()
     best_artist_tracks = get_artist_info(artist_shazam_id)[1]
     best_tracks = list()
+    background_to_download = []
     for i in best_artist_tracks:
         track_shazam_id, track_title, band, background = i
         is_track_in_db = db_sess.query(Track).filter(Track.shazam_id == track_shazam_id).first()
@@ -393,7 +461,14 @@ def about_artist(track_id=None, artist_id=None):
             track.artist_id = artist_shazam_id
             track.track = track_title
             track.band = band
-            track.background = background
+
+            if background == UNKNOWN_SONG:
+                track.background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
+            else:
+                filename = identifier(format_=".png")
+                track.background = url_for('static', filename=f'img/track/{filename}')
+                background_to_download.append([filename, background])
+
             db_sess.add(track)
             db_sess.commit()
             best_tracks.append(track)
@@ -404,8 +479,9 @@ def about_artist(track_id=None, artist_id=None):
     all_artist_tracks = db_sess.query(Track).filter(Track.artist_id == artist_shazam_id).all()
     platform_tracks = len(all_artist_tracks)
 
+    asyncio.run(download_image_handler(background_to_download, 'track'))
     return render_template('/information_pages/about_artist.html', artist=artist, best_tracks=best_tracks[:3],
-                           platform_tracks=platform_tracks, all_tracks=all_artist_tracks)
+                           platform_tracks=platform_tracks, all_tracks=all_artist_tracks, link=link)
 
 
 @app.route('/library')
@@ -573,4 +649,7 @@ def delete_profile():
 if __name__ == '__main__':
     db_session.global_init("db/PyJam.db")
     db_sess = db_session.create_session()
+    if os.name == 'nt':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
     app.run(debug=True)

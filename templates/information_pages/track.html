@@ -7,12 +7,12 @@
     {% if track %}
     <div class="track-info" style="margin-top: 0px;">
         <div class="track-image">
-            <img src="{{ track.background }}" alt="{{ track.track }}" class="img-fluid rounded-cover">        </div>
+            <img src="{{ track.background }}" alt="{{ track.track }}" class="img-fluid rounded-cover"></div>
         <div class="track-details">
             <h2 class="track-title">{{ track.track }}</h2>
             <p class="track-artist">{{ track.band }}</p>
             <div class="copy-link">
-                <button class="btn btn-success" onclick="copyToClipboard('{{ link }}')">Копировать ссылку</button>
+                <button class="btn btn-success" onclick="copyToClipboard('{{ link }}')">Поделиться</button>
             </div>
             <div class="track-actions">
                 <a href="/artist/track/{{ track.id }}" class="btn btn-primary">Об исполнителе</a>

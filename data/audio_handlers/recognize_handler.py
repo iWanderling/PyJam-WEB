@@ -1,9 +1,8 @@
 """ Модуль позволяет распознать практически любой аудиофайл, отправленный пользователем сайта
    (примечание: необходимо использование ffmpeg.exe последней версии) """
 from shazamio import Shazam
-from data.constants import *
+from data.system_files.constants import *
 import asyncio
-from pprint import pprint
 
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 

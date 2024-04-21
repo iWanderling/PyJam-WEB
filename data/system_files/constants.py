@@ -5,12 +5,12 @@ import string
 LIMIT_CONSTANT = 100
 
 
-def identifier():
+def identifier(format_):
     """ Создаёт уникальное имя для файла, который нужно распознать.
         Предотвращает распознавание чужого файла (например, в ситуации, где 2 пользователя
         одновременно распознают разные файлы и их нужно распознать по отдельности) """
     abc = string.ascii_lowercase + string.ascii_uppercase + string.digits
-    return ''.join([choice(abc) for _ in range(17)]) + '.mp3'
+    return ''.join([choice(abc) for _ in range(17)]) + format_
 
 
 # Список стран и их кодов:
@@ -66,4 +66,4 @@ AVAILABLE_GENRES = {
     'CH': []
 }
 
-UNKNOWN_SONG = "https://i1.sndcdn.com/artworks-000417448131-gof0f8-t500x500.jpg"
+UNKNOWN_SONG = 'unknown_song.png'

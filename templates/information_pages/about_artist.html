@@ -10,6 +10,9 @@
                     Количество треков на платформе: {{ platform_tracks }}
                 </figcaption>
             </figure>
+            <div class="copy-link">
+                <button class="btn btn-success" onclick="copyToClipboard('{{ link }}')">Поделиться</button>
+            </div>
         </div>
 
         <h2> Лучшие песни исполнителя </h2>
@@ -18,7 +21,7 @@
             <img width="125px"
                  height="125px"
                  class="charts-song-cover"
-                 src={{ track.background }}>
+                 src="{{ track.background }}">
 
                 <div style="font-weight: 500">
                     <a href="/track/{{ track.id }}">{{ track.track }}</a> <br>
@@ -30,18 +33,21 @@
         <h2> Все песни на исполнителя на платформе</h2>
         {% for track in all_tracks %}
         <div class="charts-content-block">
-            <img width="125px"
-                 height="125px"
-                 class="charts-song-cover"
-                 src={{ track.background }}>
+            <img width="125px" height="125px" class="charts-song-cover" src={{ track.background }}>
 
-                <div style="font-weight: 500">
-                    <a href="/track/{{ track.id }}">{{ track.track }}</a> <br>
-                    <a href="/artist/{{ track.artist_id }}">{{ track.band }}</a>
-                </div>
+            <div style="font-weight: 500">
+                <a href="/track/{{ track.id }}">{{ track.track }}</a> <br>
+                <a href="/artist/{{ track.artist_id }}">{{ track.band }}</a>
+            </div>
         </div>
         {% endfor %}
     {% else %}
             К сожалению, у нас нет информации о данном исполнителе...
     {% endif %}
+
+    <script>
+        function copyToClipboard(link) {
+            navigator.clipboard.writeText(link)
+        }
+    </script>
 {% endblock %}

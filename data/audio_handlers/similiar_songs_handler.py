@@ -1,7 +1,6 @@
 import asyncio
 from shazamio import Shazam
-from pprint import pprint
-from data.constants import *
+from data.system_files.constants import *
 
 
 async def similiar_songs(track_key):

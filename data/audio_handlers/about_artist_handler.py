@@ -2,7 +2,6 @@ from shazamio.schemas.artists import ArtistQuery
 from shazamio.schemas.enums import ArtistView
 from shazamio import Shazam
 from pprint import pprint
-from data.constants import UNKNOWN_SONG
 import asyncio
 
 
