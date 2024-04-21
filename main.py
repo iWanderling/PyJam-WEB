@@ -10,6 +10,7 @@ from data.audio_handlers.charts_handler import charts_handler
 
 # Форма регистрации и авторизации
 from data.forms.user_change_password_form import ChangePasswordForm
+from data.forms.delete_profile_form import DeleteProfileForm
 from data.forms.register_form import RegisterForm
 from data.forms.login_form import LoginForm
 from data.forms.user_form import UserForm
@@ -528,6 +529,45 @@ def edit_password():
             return render_template('/user_pages/change_password.html', form=form, message='Пароль успешно изменён')
         return render_template('/user_pages/change_password.html', form=form)
     return render_template('/user_pages/change_password.html')
+
+
+@app.route('/cabinet/delete_profile', methods=['GET', 'POST'])
+def delete_profile():
+    form = DeleteProfileForm()
+    if current_user.is_authenticated:
+        if form.validate_on_submit():
+            db_sess = db_session.create_session()
+            user = db_sess.query(User).filter(User.id == current_user.id).first()
+
+            email = form.email.data
+            password = form.password.data
+            repeat_password = form.repeat_password.data
+            confirm = form.confirm.data
+
+            if current_user.email != email:
+                return render_template('/user_pages/delete_profile.html', form=form,
+                                       message='Неправильно введена электронная почта')
+
+            if not user.check_password(password):
+                return render_template('/user_pages/delete_profile.html', form=form,
+                                       message='Вы указали неправильный пароль')
+
+            if password != repeat_password:
+                return render_template('/user_pages/delete_profile.html', form=form,
+                                       message='Пароли не совпадают')
+            if not confirm:
+                return render_template('user_pages/delete_profile.html', form=form,
+                                       message='Вы не нажали на галочку')
+
+            recognized_by_user = db_sess.query(Recognized).filter(Recognized.user_id == user.id).all()
+
+            for r in recognized_by_user:
+                db_sess.delete(r)
+            db_sess.delete(user)
+            db_sess.commit()
+            return redirect('/login')
+        return render_template('/user_pages/delete_profile.html', form=form)
+    return render_template('/user_pages/delete_profile.html')
 
 
 if __name__ == '__main__':

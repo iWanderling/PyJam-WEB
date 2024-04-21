@@ -2,18 +2,22 @@
 {% block title %} Главная {% endblock %}
 
 {% block content %}
-<div style="margin-top: 150px;">
-    {% if current_user.is_authenticated %}
-        <h2> Здравствуйте, {{current_user.name}}! </h2>
+    <div style="margin-top: 100px;">
+        {% if current_user.is_authenticated %}
+            <h2> Здравствуйте, {{current_user.name}}! </h2>
 
-        {% if rec_count %}
-            <h2> За всё время на платформе вы распознали уникальных треков: {{ rec_count }}</h2>
+            {% if rec_count %}
+                <h2> За всё время на платформе вы распознали уникальных треков: {{ rec_count }}</h2>
+            {% else %}
+                <h2> Вы ещё не распознали ни одного трека. Самое время начать!</h2>
+            {% endif %}
+
+            <a class="btn btn-primary" href="/cabinet/edit"> Редактировать данные </a>
+            <a class="btn btn-success" href="/cabinet/change-password"> Сменить пароль </a>
+            <a class="btn btn-danger" href="/logout"> Выйти из аккаунта </a>
+            <a class="btn btn-dark" href="/cabinet/delete_profile"> Удалить аккаунт </a>
         {% else %}
-            <h2> Вы ещё не распознали ни одного трека. Самое время начать!</h2>
+            <h2> Авторизуйтесь, чтобы получить доступ к своему личному кабинету! </h2>
         {% endif %}
-
-        <a class="btn btn-success" href="/cabinet/edit"> Редактировать данные </a>
-    {% else %}
-        <h2> Авторизуйтесь, чтобы получить доступ к своему личному кабинету! </h2>
-    {% endif %}
+    </div>
 {% endblock %}
