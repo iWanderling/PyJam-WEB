@@ -2,6 +2,7 @@
 {% block title %} Главная {% endblock %}
 
 {% block content %}
+<div style="margin-top: 150px;">
     {% if current_user.is_authenticated %}
         <h2> Здравствуйте, {{current_user.name}}! </h2>
 

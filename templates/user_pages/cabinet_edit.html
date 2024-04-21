@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %} Главная {% endblock %}
 
+
 {% block content %}
     <style>
         .login-form {
@@ -63,6 +64,7 @@
         }
     </style>
 
+<div style="margin-top: 100px;">
     {% if current_user.is_authenticated %}
         <form action="" method="post" class="login-form {% if form.email.errors or form.surname.errors or form.name.errors %}error-field{% endif %}">
             <h1>Редактирование информации</h1>
