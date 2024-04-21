@@ -4,27 +4,42 @@
 {% block scripts %}
 <script>
     function copyToClipboard(link) {
-        navigator.clipboard.writeText(link)
+        var textarea = document.createElement("textarea");
+        textarea.value = link;
+        textarea.style.position = "fixed";  // чтобы элемент не был виден на странице
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea); // удаляем временный элемент
+        console.log("Ссылка скопирована в буфер обмена:", link);
     }
 </script>
 {% endblock %}
 
 {% block content %}
+<div class="container_track" style="margin-top: 150px;">
     {% if track %}
-        <div class="recognize-window">
-            <figure style="margin: 40px 0px;">
-                <img width="250px" height="250px" style="border-radius: 25px" src= {{ track.background }}>
-                <figcaption> <b>{{ track.track }}</b> <br> {{ track.band }} </figcaption>
-            </figure>
-            <div>
-                Должен быть скопирован следующий текст: {{ link }} (Если скопировался, значит, работает, напишешь мне) <br>
-                <a class="btn btn-primary" href="/artist/track/{{ track.id }}">Об исполнителе</a>
-                <a class="btn btn-danger" href="/similiar/track/{{ track.id }}">Похожие треки</a>
-                <button class="btn btn-success" onClick="copyToClipboard('{{link}}')">Поделиться</button>
-
+    <div class="track-info" style="margin-top: 0px;">
+        <div class="track-image">
+            <img src="{{ track.background }}" alt="{{ track.track }}" class="img-fluid rounded-cover">        </div>
+        <div class="track-details">
+            <h2 class="track-title">{{ track.track }}</h2>
+            <p class="track-artist">{{ track.band }}</p>
+            <div class="copy-link">
+                <p>Для поделиться, скопируйте ссылку:</p>
+                <input type="text" id="share-link" value="{{ link }}" readonly>
+                <button class="btn btn-success" onclick="copyToClipboard('{{ link }}')">Копировать ссылку</button>
+            </div>
+            <div class="track-actions">
+                <a href="/artist/track/{{ track.id }}" class="btn btn-primary">Об исполнителе</a>
+                <a href="/similiar/track/{{ track.id }}" class="btn btn-danger">Похожие треки</a>
             </div>
         </div>
+    </div>
     {% else %}
-            К сожалению, у нас нет информации о данном треке...
+    <div class="no-track-info">
+        <p>К сожалению, у нас нет информации о данном треке...</p>
+    </div>
     {% endif %}
+</div>
 {% endblock %}
