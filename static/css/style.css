@@ -136,6 +136,9 @@ form {
 .track-title {
     font-size: 24px;
     margin-top: 0;
+    color: #007bff;
+    font-weight: bold;
+    font-size: 30px;
 }
 
 .track-artist {

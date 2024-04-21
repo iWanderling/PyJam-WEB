@@ -2,6 +2,7 @@
 {% block title %} Главная {% endblock %}
 {% block content %}
 {% if similiar_tracks %}
+
 <div class="recognize-window">
     <figure style="margin: 40px 0px; display: flex;">
         <img width="250px" height="250px" style="border-radius: 25px;" src={{ track_owner.background }}>
@@ -19,16 +20,19 @@
         {% for track in similiar_tracks %}
         <div class="col-md-3">
             <div class="charts-content-block" style="overflow: hidden;">
-                <img width="200px"
-                     height="200px"
-                     class="charts-song-cover"
-                     src={{ track.background }}>
+                <a href="/track/{{ track.id }}">
+                    <img width="200px"
+                         height="200px"
+                         class="charts-song-cover"
+                         src={{ track.background }}>
+                </a>
                 <div style="font-weight: 500; margin-top: 15px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                     <a href="/track/{{ track.id }}">{{ track.track }}</a><br>
                     <a href="/artist/{{ track.artist_id }}">{{ track.band }}</a>
                 </div>
             </div>
         </div>
+
         {% if loop.index % 4 == 0 %}
     </div>
     <div class="row">
@@ -48,6 +52,7 @@
         .animated-text {
             animation: slideIn 0.5s ease-out;
         }
+
     </style>
     {% endblock %}
 </div>
