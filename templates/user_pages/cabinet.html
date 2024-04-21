@@ -11,7 +11,9 @@
             <h2> Вы ещё не распознали ни одного трека. Самое время начать!</h2>
         {% endif %}
 
-        <a class="btn btn-success" href="/cabinet/edit"> Редактировать данные </a>
+        <a class="btn btn-primary" href="/cabinet/edit"> Редактировать данные </a>
+        <a class="btn btn-success" href="/cabinet/change-password"> Сменить пароль </a>
+        <a class="btn btn-danger" href="/logout"> Выйти из аккаунта </a>
     {% else %}
         <h2> Авторизуйтесь, чтобы получить доступ к своему личному кабинету! </h2>
     {% endif %}
