@@ -93,6 +93,11 @@
             </div>
         {% endfor %}
     </div>
+    <div class="form-group form-group-lg">
+        {{ form.gender.label }}
+        {{ form.gender(class="form-control") }}
+    </div>
+    <br>
     <div class="form-group">
         {{ form.surname.label }}<br>
         {{ form.surname(class="form-control") }}<br>

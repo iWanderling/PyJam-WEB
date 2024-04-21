@@ -12,10 +12,13 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     __tablename__ = 'users'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    surname = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    email = sqlalchemy.Column(sqlalchemy.String, unique=True, nullable=True)
-    hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    email = sqlalchemy.Column(sqlalchemy.String, unique=True)
+    surname = sqlalchemy.Column(sqlalchemy.String)
+    name = sqlalchemy.Column(sqlalchemy.String)
+    gender = sqlalchemy.Column(sqlalchemy.String)
+    hashed_password = sqlalchemy.Column(sqlalchemy.String)
+    unique = sqlalchemy.Column(sqlalchemy.String, default='')
+    unique_total = sqlalchemy.Column(sqlalchemy.Integer, default=0)
 
     # Кэшировать пароль
     def set_password(self, password):

@@ -1,21 +1,22 @@
 # Модули для работы с Flask
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from flask import Flask, render_template, redirect, request, jsonify
+from flask import Flask, render_template, redirect, request, url_for
 
 # Обработчики ShazamAPI
-from data.audio_handlers.recognize_handler import recognize_song, identifier
 from data.audio_handlers.similiar_songs_handler import get_similiar_songs
 from data.audio_handlers.about_artist_handler import get_artist_info
+from data.audio_handlers.recognize_handler import recognize_song
 from data.audio_handlers.charts_handler import charts_handler
 
 # Форма регистрации и авторизации
+from data.forms.user_change_password_form import ChangePasswordForm
 from data.forms.register_form import RegisterForm
 from data.forms.login_form import LoginForm
 from data.forms.user_form import UserForm
 
 # ORM-модели
 from data.ORM import db_session
-from data.ORM.recognized import Recognized, get_valid_date
+from data.ORM.recognized import Recognized
 from data.ORM.artist import Artist
 from data.ORM.track import Track
 from data.ORM.user import User
@@ -43,11 +44,36 @@ def load_user(user_id):
     db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
 
+@app.errorhandler(401)
+@app.errorhandler(404)
+def page_error_code(e):
+    return render_template('handlers/error_handler.html', error_status=e)
+
 
 @app.route('/', methods=["GET", "POST"])
 def main():
     """ Главная страница """
-    return render_template('main.html')
+    users = db_sess.query(User).all()
+    active_users = list()
+
+    users = list(sorted(users, key=lambda u: len(u.unique.split('&')), reverse=True))
+
+    for u in users[:3]:
+        user_library = db_sess.query(Recognized).filter(Recognized.user_id == u.id).all()
+
+        user_info = dict()
+        user_info['name'] = u.name
+        user_info['surname'] = u.surname
+
+        if u.gender == 'Мужской':
+            user_info['background'] = url_for('static', filename='img/user_profile/man.png')
+        else:
+            user_info['background'] = url_for('static', filename='img/user_profile/woman.png')
+        user_info['total'] = len(u.unique.split('&')) - 1
+        user_info['in_library'] = len(user_library)
+
+        active_users.append(user_info)
+    return render_template('nav_pages/main.html', active_users=active_users)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -62,13 +88,13 @@ def reqister():
     # Обработка нажатия на кнопку (Зарегистрироваться)
     if form.validate_on_submit():
         # Проверка пароля на надёжность (слабая, доработать)
-        if any([len(form.password.data) <= 9, form.password.data.isdigit()]):
-            return render_template('register.html', title='Регистрация',
+        if any([len(form.password.data) < 9, form.password.data.isdigit()]):
+            return render_template('/authentication_pages/register.html', title='Регистрация',
                                    message="Пароль содержит менее 9 символов или содержит только цифры",
                                    form=form)
 
         if form.password.data != form.password_again.data:
-            return render_template('register.html', title='Регистрация',
+            return render_template('/authentication_pages/register.html', title='Регистрация',
                                    form=form,
                                    message="Пароли не совпадают")
 
@@ -77,7 +103,7 @@ def reqister():
         # иначе - продолжаем процесс регистрации:
         db_sess = db_session.create_session()
         if db_sess.query(User).filter(User.email == form.email.data).first():
-            return render_template('register.html', title='Регистрация',
+            return render_template('/authentication_pages/register.html', title='Регистрация',
                                    form=form,
                                    message="Такой пользователь уже есть")
 
@@ -86,6 +112,7 @@ def reqister():
         user.email = form.email.data
         user.surname = form.surname.data
         user.name = form.name.data
+        user.gender = form.gender.data
 
         # Шифруем пароль пользователя и регистрируем его:
         user.set_password(form.password.data)
@@ -96,7 +123,7 @@ def reqister():
         return redirect('/login')
 
     # Отображение страницы регистрации:
-    return render_template('register.html', title='Регистрация', form=form)
+    return render_template('/authentication_pages/register.html', title='Регистрация', form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -122,10 +149,10 @@ def login():
             return redirect("/")
 
         # Если пользователь ввёл некорректные данные, то выводим соответствующее сообщение:
-        return render_template('login.html', message="Неправильный логин или пароль", form=form)
+        return render_template('/authentication_pages/login.html', message="Неправильный логин или пароль", form=form)
 
     # Отображение страницы авторизации:
-    return render_template('login.html', title='Авторизация', form=form)
+    return render_template('/authentication_pages/login.html', title='Авторизация', form=form)
 
 
 @app.route('/logout')
@@ -154,7 +181,7 @@ def recognize():
 
     # Если пользователь ничего не отправил - возвращаем обычную страницу
     if request.method == "GET":
-        return render_template('recognize.html', background=UNKNOWN_SONG)
+        return render_template('/nav_pages/recognize.html', background=UNKNOWN_SONG)
 
     # Если пользователь отправил файл на распознание, то возвращаем пользователю информацию о распознанном треке:
     elif request.method == "POST":
@@ -162,7 +189,7 @@ def recognize():
         # Загружаем отправленный пользователем файл, если пользователь ничего не отправил - перезагружаем страницу:
         f = request.files['file']
         if not f.filename:
-            return render_template('recognize.html', message='Вы не отправили файл', background=UNKNOWN_SONG)
+            return render_template('/nav_pages/recognize.html', message='Вы не отправили файл', background=UNKNOWN_SONG)
         file_path = 'static/music/' + identifier()
         f.save(file_path)
 
@@ -209,13 +236,19 @@ def recognize():
             ).first()
 
             if already_recognized:
-                already_recognized_copy = already_recognized
                 db_sess.delete(already_recognized)
 
             recognized = Recognized()
             recognized.user_id = current_user.id
             recognized.track_id = track_id
             recognized.is_favourite = False
+
+            user = db_sess.query(User).filter(User.id == current_user.id).first()
+            user_unique_total = user.unique.split('&')
+
+            if str(track_id) not in user_unique_total:
+                user.unique += f'{track_id}&'
+                user.unique_total += 1
 
             db_sess.add(recognized)
             db_sess.commit()
@@ -262,8 +295,9 @@ def charts(country=None, genre=None):
         genre = 'Все жанры'
 
     available_genres = AVAILABLE_GENRES[country]
-    return render_template('charts.html', top=top, available_genres=available_genres, country=country_list[country],
-                           country_code=country, genres_list=genres_list, genre_type=genres_list[genre])
+    return render_template('/nav_pages/charts.html', top=top, available_genres=available_genres,
+                           country=country_list[country], country_code=country, genres_list=genres_list,
+                           genre_type=genres_list[genre])
 
 
 @app.route('/recognize/track/<int:track_id>')
@@ -275,9 +309,9 @@ def track_info(track_id):
     link = '12412412515'
     # Если трек не удалось распознать, то ничего не отправляем на вывод:
     if track_id == 0:
-        return render_template('track.html')
+        return render_template('/information_pages/track.html')
     track = db_sess.query(Track).filter(Track.id == track_id).first()
-    return render_template('track.html', track=track, link=link)
+    return render_template('/information_pages/track.html', track=track, link=link)
 
 
 @app.route('/similiar/track/<int:track_id>')
@@ -287,7 +321,7 @@ def similiar_songs(track_id):
     track_key = track_owner.track_key
 
     if not track_key:
-        return render_template('similiar_songs.html')
+        return render_template('/information_pages/similiar_songs.html')
 
     songs = get_similiar_songs(track_key)
     similiar_tracks = list()
@@ -311,7 +345,9 @@ def similiar_songs(track_id):
             track = is_track_in_db
             similiar_tracks.append(track)
 
-    return render_template('similiar_songs.html', track_owner=track_owner,
+    # В список может загрузиться несколько одинаковых песен, поэтому, избавляемся от дубликатов:
+    similiar_tracks = list(set(similiar_tracks))
+    return render_template('/information_pages/similiar_songs.html', track_owner=track_owner,
                            similiar_tracks=similiar_tracks)
 
 @app.route('/artist/track/<int:track_id>')
@@ -331,7 +367,7 @@ def about_artist(track_id=None, artist_id=None):
         try:
             all_artist_info = get_artist_info(artist_shazam_id)
         except KeyError:
-            return render_template('about_artist.html')
+            return render_template('/information_pages/about_artist.html')
 
         artist_shazam_id, artist_title, genre, background = all_artist_info[0][:4]
         artist = Artist()
@@ -367,7 +403,7 @@ def about_artist(track_id=None, artist_id=None):
     all_artist_tracks = db_sess.query(Track).filter(Track.artist_id == artist_shazam_id).all()
     platform_tracks = len(all_artist_tracks)
 
-    return render_template('about_artist.html', artist=artist, best_tracks=best_tracks[:3],
+    return render_template('/information_pages/about_artist.html', artist=artist, best_tracks=best_tracks[:3],
                            platform_tracks=platform_tracks, all_tracks=all_artist_tracks)
 
 
@@ -382,15 +418,14 @@ def user_library():
             track = db_sess.query(Track).filter(Track.id == i.track_id).first()
             library.append((track, i))
 
-        return render_template('library.html', library=reversed(library))
-    return render_template('library.html')
+        return render_template('/user_pages/library.html', library=reversed(library))
+    return render_template('/user_pages/library.html')
 
 
 @app.route('/delete/track/<int:track_id>', methods=["GET"])
 def delete_track(track_id):
     track_to_delete = db_sess.query(Recognized).filter(Recognized.user_id == current_user.id,
                                                        Recognized.id == track_id).first()
-    print(track_to_delete, '----------')
     db_sess.delete(track_to_delete)
     db_sess.commit()
 
@@ -399,73 +434,100 @@ def delete_track(track_id):
 
 @app.route('/featured')
 def featured():
-    featured_library = list()
-    featured_tracks = db_sess.query(Recognized).filter(Recognized.user_id == current_user.id,
-                                                       Recognized.is_favourite == 1).all()
+    if current_user.is_authenticated:
+        featured_library = list()
+        featured_tracks = db_sess.query(Recognized).filter(Recognized.user_id == current_user.id,
+                                                           Recognized.is_favourite == 1).all()
 
-    for i in featured_tracks:
-        track = db_sess.query(Track).filter(Track.id == i.track_id).first()
-        featured_library.append((track, i))
+        for i in featured_tracks:
+            track = db_sess.query(Track).filter(Track.id == i.track_id).first()
+            featured_library.append((track, i))
 
-    return render_template('library.html', library=reversed(featured_library))
+        return render_template('/user_pages/library.html', library=reversed(featured_library))
+    return render_template('/user_pages/library.html')
 
 
 @app.route('/feature/track/<int:track_id>', methods=["GET"])
 def feature_track(track_id):
-    track = db_sess.query(Recognized).filter(Recognized.user_id == current_user.id,
-                                             Recognized.id == track_id).first()
-    if not track.is_favourite:
-        track.is_favourite = 1
-    else:
-        track.is_favourite = 0
+    if current_user.is_authenticated:
+        track = db_sess.query(Recognized).filter(Recognized.user_id == current_user.id,
+                                                 Recognized.id == track_id).first()
+        if not track.is_favourite:
+            track.is_favourite = 1
+        else:
+            track.is_favourite = 0
 
-    db_sess.commit()
-    return redirect('/library')
-
+        db_sess.commit()
+        return redirect('/library')
+    return redirect('/featured')
 
 @app.route('/cabinet')
 def cabinet():
     if current_user.is_authenticated:
-        user_recognized_count = len(db_sess.query(Recognized).filter(Recognized.user_id == current_user.id).all())
-        return render_template('cabinet.html', rec_count=user_recognized_count)
-    return render_template('cabinet.html')
+        user = db_sess.query(User).filter(User.id == current_user.id).first()
+        user_unique_total = len(user.unique.split('&')) - 1
+        return render_template('/user_pages/cabinet.html', rec_count=user_unique_total)
+    return render_template('/user_pages/cabinet.html')
 
 
 @app.route('/cabinet/edit', methods=['GET', 'POST'])
 def edit_cabinet():
-
+    form = UserForm()
     if current_user.is_authenticated:
-        form = UserForm()
-        UserForm.email.data = current_user.email
-        UserForm.surname.data = current_user.surname
-        UserForm.name.data = current_user.name
+        if request.method == "GET":
+            form.email.data = current_user.email
+            form.surname.data = current_user.surname
+            form.name.data = current_user.name
 
         if form.validate_on_submit():
-            if any([len(form.new_password.data) <= 9, form.new_password.data.isdigit()]):
-                return render_template('cabinet_edit.html', form=form,
-                                       message="Пароль содержит менее 9 символов или содержит только цифры")
-
-            if form.new_password.data != form.new_password_again.data:
-                return render_template('cabinet_edit.html', form=form,
-                                       message="Пароли не совпадают")
-
             db_sess = db_session.create_session()
-            is_user_already_exists = db_sess.query(User).filter(User.email == form.email.data).first()
+            is_user_already_exists = db_sess.query(User).filter(User.email == form.email.data,
+                                                                User.email != current_user.email).first()
             if is_user_already_exists:
-                return render_template('cabinet_edit.html', form=form,
+                return render_template('/user_pages/cabinet_edit.html', form=form,
                                        message="Такой пользователь уже существует")
 
             user = db_sess.query(User).filter(User.id == current_user.id).first()
             user.email = form.email.data
             user.surname = form.surname.data
             user.name = form.name.data
-
-            user.set_password(form.new_password.data)
+            user.gender = form.gender.data
             db_sess.commit()
-            print(current_user.name)
             return redirect('/cabinet')
-        return render_template('cabinet_edit.html', form=form)
-    return render_template('cabinet_edit.html')
+        return render_template('/user_pages/cabinet_edit.html', form=form)
+    return render_template('/user_pages/cabinet_edit.html')
+
+
+@app.route('/cabinet/change-password', methods=['GET', 'POST'])
+def edit_password():
+    form = ChangePasswordForm()
+    if current_user.is_authenticated:
+        if form.validate_on_submit():
+            db_sess = db_session.create_session()
+
+            current_password = form.current_password.data
+            new_password = form.new_password.data
+            repeat_password = form.repeat_password.data
+
+            if not current_user.check_password(current_password):
+                return render_template('/user_pages/change_password.html', form=form,
+                                       message='Вы указали неверный пароль')
+
+            if new_password != repeat_password:
+                return render_template('/user_pages/change_password.html', form=form,
+                                       message="Введённые пароли не совпадают")
+
+            if any([len(new_password) < 9, new_password.isdigit()]):
+                return render_template('/user_pages/change_password.html', form=form,
+                                       message="Пароль содержит менее 9 символов или содержит только цифры")
+
+            user = db_sess.query(User).filter(User.id == current_user.id).first()
+            user.set_password(new_password)
+            db_sess.commit()
+
+            return render_template('/user_pages/change_password.html', form=form, message='Пароль успешно изменён')
+        return render_template('/user_pages/change_password.html', form=form)
+    return render_template('/user_pages/change_password.html')
 
 
 if __name__ == '__main__':
