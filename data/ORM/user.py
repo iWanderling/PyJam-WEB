@@ -19,6 +19,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     hashed_password = sqlalchemy.Column(sqlalchemy.String)
     unique = sqlalchemy.Column(sqlalchemy.String, default='')
     unique_total = sqlalchemy.Column(sqlalchemy.Integer, default=0)
+    background = sqlalchemy.Column(sqlalchemy.String)
 
     # Кэшировать пароль
     def set_password(self, password):

@@ -4,18 +4,65 @@
 {% block content %}
     <div style="margin-top: 100px;">
         {% if current_user.is_authenticated %}
-            <h2> Здравствуйте, {{current_user.name}}! </h2>
+            <div>
+                <div>
+                    <h1> Здравствуйте, {{current_user.name}}! 👋 </h1>
+                    <h2> На данный момент вы
+                        {% if intop_position == 1 %}
+                            лидируете в тройке лидеров и занимаете 🥇 место в нашем рейтинге!
+                        {% elif intop_position == 2 %}
+                            находитесь в тройке лидеров и занимаете 🥈 место в нашем рейтинге!
+                        {% elif intop_position == 3 %}
+                            находитесь в тройке лидеров и занимаете 🥉 место в нашем рейтинге!
+                        {% else %}
+                            находитесь в нашем рейтинге на {{ intop_position }} месте!
+                        {% endif %}
+                    </h2>
+                 </div>
+                <h1> Ваша статистика </h1>
+                {% if rec_count %}
+                    <h2> 🎶 За всё время на платформе вы распознали уникальных треков: {{ rec_count }}</h2>
+                    {% if library_count %}
+                        <h2> 📖 В вашей библиотеке хранится уникальных треков: {{ library_count }} </h2>
+                        {% if featured_count %}
+                            <h2> ⭐ Из них в избранном находятся: {{ featured_count }} </h2>
+                        {% else %}
+                            <h2> ⭐ Ни один из них не находится в избранном </h2>
+                        {% endif %}
+                    {% else %}
+                        <h2> 📖 Ваша библиотека сейчас пустая. Самое время пополнить её парочкой новых треков! </h2>
+                    {% endif %}
+                {% else %}
+                    <h2> Вы ещё не распознали ни одного трека. Самое время начать!</h2>
+                {% endif %}
 
-            {% if rec_count %}
-                <h2> За всё время на платформе вы распознали уникальных треков: {{ rec_count }}</h2>
-            {% else %}
-                <h2> Вы ещё не распознали ни одного трека. Самое время начать!</h2>
-            {% endif %}
-
-            <a class="btn btn-primary" href="/cabinet/edit"> Редактировать данные </a>
-            <a class="btn btn-success" href="/cabinet/change-password"> Сменить пароль </a>
-            <a class="btn btn-danger" href="/logout"> Выйти из аккаунта </a>
-            <a class="btn btn-dark" href="/cabinet/delete_profile"> Удалить аккаунт </a>
+                <a class="btn btn-primary" href="/cabinet/edit"> Редактировать данные </a>
+                <a class="btn btn-success" href="/cabinet/change-password"> Сменить пароль </a>
+                <a class="btn btn-danger" href="/logout"> Выйти из аккаунта </a>
+                <a class="btn btn-dark" href="/cabinet/delete_profile"> Удалить аккаунт </a>
+            </div>
+            <div style="margin-top: 20px">
+                <div class="charts-content-block big-song" style="position: relative;">
+                    <div class="badge badge-primary badge-pill d-flex justify-content-center align-items-center" style="position: absolute; top: 10px; right: 130px; top: 0; font-size: 40px; background-color: transparent; width: 40px; height: 40px; line-height: 40px; text-align: center; border-radius: 50%;">
+                        {% if intop_position == 1 %}
+                            🥇
+                        {% elif intop_position == 2 %}
+                            🥈
+                        {% elif intop_position == 3 %}
+                            🥉
+                        {% endif %}
+                    </div>
+                    <img class="charts-song-cover" src="{{current_user.background}}">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="profile_img">Загрузите картинку профиля</label>
+                            <input type="file" accept=".jpg,.png" class="form-control-file" id="profile_img" name="file">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Загрузить</button>
+                        <a class="btn btn-danger" href="/cabinet/set_default"> Сбросить </a>
+                    </form>
+                </div>
+            </div>
         {% else %}
             <h2> Авторизуйтесь, чтобы получить доступ к своему личному кабинету! </h2>
         {% endif %}

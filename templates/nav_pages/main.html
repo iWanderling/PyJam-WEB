@@ -2,33 +2,35 @@
 {% block title %} Главная {% endblock %}
 
 {% block content %}
-<div style="margin-top: 100px;">
-    <div class="row">
-        {% for user in active_users %}
-            <div class="col-md-4">
-                <div class="charts-content-block big-song" style="position: relative;">
-                    <div class="badge badge-primary badge-pill d-flex justify-content-center align-items-center" style="position: absolute; top: 10px; right: 130px; top: 0; font-size: 40px; background-color: transparent; width: 40px; height: 40px; line-height: 40px; text-align: center; border-radius: 50%;">
-                        {% if loop.index == 1 %}
-                            🥇
-                        {% elif loop.index == 2 %}
-                            🥈
-                        {% else %}
-                            🥉
-                        {% endif %}
-                    </div>
-                    <span style="font-size: 24px;"></span>
-                    <img width="200px"
-                         height="200px"
-                         class="charts-song-cover"
-                         src="{{ user.background }}">
+    <div style="margin-top: 100px;">
+            <h1 class="top-100-heading"> Топ пользователей </h1>
+        <div class="row">
+            {% for user in active_users %}
+                <div class="col-md-4">
+                    <div class="charts-content-block big-song" style="position: relative;">
+                        <div class="badge badge-primary badge-pill d-flex justify-content-center align-items-center" style="position: absolute; top: 10px; right: 130px; top: 0; font-size: 40px; background-color: transparent; width: 40px; height: 40px; line-height: 40px; text-align: center; border-radius: 50%;">
+                            {% if loop.index == 1 %}
+                                🥇
+                            {% elif loop.index == 2 %}
+                                🥈
+                            {% else %}
+                                🥉
+                            {% endif %}
+                        </div>
+                        <span style="font-size: 24px;"></span>
+                        <img width="200px"
+                             height="200px"
+                             class="charts-song-cover"
+                             src="{{ user.background }}">
 
-                    <div style="font-weight: 500">
-                        <p> {{ user.name.capitalize() }} {{ user.surname.capitalize() }}</p>
-                        <p> Распознано уникальных треков: {{user.total}}</p>
-                        <p> Распознанных треков в библиотеке: {{user.in_library}}</p>
+                        <div style="font-weight: 500">
+                            <p> {{ user.name.capitalize() }} {{ user.surname.capitalize() }}</p>
+                            <p> 🎶 Распознано уникальных треков: {{user.total}}</p>
+                            <p> 📖 Распознанных треков в библиотеке: {{user.in_library}}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}

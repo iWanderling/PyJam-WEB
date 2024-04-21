@@ -31,11 +31,9 @@ from data.system_files.constants import *
 # Для удаления загруженных на сервер файлов
 import os
 
-
 # Инициализация приложения:
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'FFFFF0-JHKMQ1-KRMB89-KLLLVV-ZZHMN5'
-
 
 # Инициализация объекта LoginManager, функции для загрузки пользователя:
 login_manager = LoginManager()
@@ -47,6 +45,7 @@ def load_user(user_id):
     """ :Загрузка пользователя: """
     db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
+
 
 @app.errorhandler(401)
 @app.errorhandler(404)
@@ -68,11 +67,7 @@ def main():
         user_info = dict()
         user_info['name'] = u.name
         user_info['surname'] = u.surname
-
-        if u.gender == 'Мужской':
-            user_info['background'] = url_for('static', filename='img/user_profile/man.png')
-        else:
-            user_info['background'] = url_for('static', filename='img/user_profile/woman.png')
+        user_info['background'] = u.background
         user_info['total'] = len(u.unique.split('&')) - 1
         user_info['in_library'] = len(user_library)
 
@@ -118,6 +113,11 @@ def reqister():
         user.name = form.name.data
         user.gender = form.gender.data
 
+        if user.gender == 'Мужской':
+            user.background = url_for('static', filename='img/user_profile/man.png')
+        else:
+            user.background = url_for('static', filename='img/user_profile/woman.png')
+
         # Шифруем пароль пользователя и регистрируем его:
         user.set_password(form.password.data)
         db_sess.add(user)
@@ -150,7 +150,7 @@ def login():
         # Авторизация:
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
-            return redirect("/")
+            return redirect("/cabinet")
 
         # Если пользователь ввёл некорректные данные, то выводим соответствующее сообщение:
         return render_template('/authentication_pages/login.html', message="Неправильный логин или пароль", form=form)
@@ -298,7 +298,6 @@ def charts(country=None, genre=None):
                 track.artist_id = i['artist_id']
                 track.track = i['track']
                 track.band = i['band']
-                track.popularity = 0
 
                 if i['background'] == UNKNOWN_SONG:
                     track.background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
@@ -322,7 +321,6 @@ def charts(country=None, genre=None):
             none_track.track = i['track']
             none_track.band = i['band']
             none_track.background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
-            none_track.popularity = 0
             top.append(none_track)
 
     if genre is None:
@@ -538,13 +536,46 @@ def feature_track(track_id):
         return redirect('/library')
     return redirect('/featured')
 
-@app.route('/cabinet')
+
+@app.route('/cabinet', methods=['GET', 'POST'])
 def cabinet():
     if current_user.is_authenticated:
+        users = db_sess.query(User).all()
         user = db_sess.query(User).filter(User.id == current_user.id).first()
-        user_unique_total = len(user.unique.split('&')) - 1
-        return render_template('/user_pages/cabinet.html', rec_count=user_unique_total)
+
+        if request.method == 'GET':
+            user_unique_total = len(user.unique.split('&')) - 1
+            user_in_library = len(db_sess.query(Recognized).filter(Recognized.user_id == user.id).all())
+            user_in_featured = len(db_sess.query(Recognized).filter(Recognized.user_id == user.id,
+                                                                    Recognized.is_favourite == 1).all())
+            user_in_top = list(sorted(users, key=lambda u: len(u.unique.split('&')), reverse=True)).index(user) + 1
+            return render_template('/user_pages/cabinet.html', rec_count=user_unique_total,
+                                   library_count=user_in_library, featured_count=user_in_featured,
+                                   intop_position=user_in_top)
+
+        elif request.method == 'POST':
+            f = request.files['file']
+            if not f.filename:
+                return render_template('/user_pages/cabinet.html', message='Вы не отправили файл')
+            file_path = 'static/img/user_profile/' + identifier(format_='.png')
+            f.save(file_path)
+            user.background = file_path
+            db_sess.commit()
+            return redirect('/cabinet')
     return render_template('/user_pages/cabinet.html')
+
+
+@app.route('/cabinet/set_default')
+def cabinet_set_default_profile():
+    if current_user.is_authenticated:
+        user = db_sess.query(User).filter(User.id == current_user.id).first()
+
+        if user.gender == 'Мужской':
+            user.background = url_for('static', filename='img/user_profile/man.png')
+        else:
+            user.background = url_for('static', filename='img/user_profile/woman.png')
+        db_sess.commit()
+    return redirect('/cabinet')
 
 
 @app.route('/cabinet/edit', methods=['GET', 'POST'])
@@ -569,6 +600,15 @@ def edit_cabinet():
             user.surname = form.surname.data
             user.name = form.name.data
             user.gender = form.gender.data
+
+            # Меняем изображение
+            if url_for('static', filename='img/user_profile/man.png') == user.background or \
+                    url_for('static', filename='img/user_profile/woman.png') == user.background:
+                if user.gender == 'Мужской':
+                    user.background = url_for('static', filename='img/user_profile/man.png')
+                else:
+                    user.background = url_for('static', filename='img/user_profile/woman.png')
+
             db_sess.commit()
             return redirect('/cabinet')
         return render_template('/user_pages/cabinet_edit.html', form=form)
