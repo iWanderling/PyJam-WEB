@@ -62,6 +62,7 @@
     }
 </style>
 
+<div style="margin-top: 100px;">
 <form action="" method="post" class="login-form {% if form.email.errors or form.password.errors or form.password_again.errors or form.surname.errors or form.name.errors %}error-field{% endif %}">
     <h1>Регистрация</h1>
     {{ form.hidden_tag() }}

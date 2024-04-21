@@ -107,3 +107,80 @@ form {
   50% { background-position: 100% 50% }
   100% { background-position: 0% 50% }
 }
+
+
+
+
+
+/* Add this CSS to your existing stylesheet */
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.track-info {
+    display: flex;
+    margin-top: 50px;
+}
+
+.track-image {
+    flex: 0 0 40%;
+}
+
+.track-details {
+    flex: 0 0 60%;
+    padding-left: 20px;
+}
+
+.track-title {
+    font-size: 24px;
+    margin-top: 0;
+}
+
+.track-artist {
+    font-size: 18px;
+    color: #666;
+}
+
+.copy-link {
+    margin-top: 20px;
+}
+
+.copy-link input {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+}
+
+.track-actions {
+    margin-top: 20px;
+}
+
+.no-track-info {
+    text-align: center;
+    margin-top: 50px;
+    color: #666;
+}
+
+.rounded-cover {
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.container_track {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.rounded-cover img {
+    border-radius: 30px; /* Adjust the value as needed */
+}
+
+.share-btn {
+    background: none;
+    border: none;
+    padding: 0;
+}
