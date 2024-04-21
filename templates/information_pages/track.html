@@ -1,20 +1,6 @@
 {% extends "base.html" %}
 {% block title %} Распознать песню {% endblock %}
 
-{% block scripts %}
-<script>
-    function copyToClipboard(link) {
-        var textarea = document.createElement("textarea");
-        textarea.value = link;
-        textarea.style.position = "fixed";  // чтобы элемент не был виден на странице
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea); // удаляем временный элемент
-        console.log("Ссылка скопирована в буфер обмена:", link);
-    }
-</script>
-{% endblock %}
 
 {% block content %}
 <div class="container_track" style="margin-top: 150px;">
@@ -26,8 +12,6 @@
             <h2 class="track-title">{{ track.track }}</h2>
             <p class="track-artist">{{ track.band }}</p>
             <div class="copy-link">
-                <p>Для поделиться, скопируйте ссылку:</p>
-                <input type="text" id="share-link" value="{{ link }}" readonly>
                 <button class="btn btn-success" onclick="copyToClipboard('{{ link }}')">Копировать ссылку</button>
             </div>
             <div class="track-actions">
@@ -42,4 +26,11 @@
     </div>
     {% endif %}
 </div>
+
+    <script>
+        function copyToClipboard(link) {
+            navigator.clipboard.writeText(link)
+        }
+    </script>
+
 {% endblock %}
