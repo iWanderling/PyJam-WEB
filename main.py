@@ -56,11 +56,14 @@ def page_error_code(e):
 @app.route('/', methods=["GET", "POST"])
 def main():
     """ Главная страница """
-    users = db_sess.query(User).all()
+    users = list(sorted(db_sess.query(User).all(), key=lambda u: len(u.unique.split('&')), reverse=True))
+    big_library = db_sess.query(Recognized).all()
+    tracks = list(sorted(db_sess.query(Track).all(), key=lambda t: t.popularity, reverse=True))
+    artists = db_sess.query(Artist).all()
+
+    # Всего пользователей на платформе, топ-3 самых активных пользователя на платформе:
+    all_users = len(users)
     active_users = list()
-
-    users = list(sorted(users, key=lambda u: len(u.unique.split('&')), reverse=True))
-
     for u in users[:3]:
         user_library = db_sess.query(Recognized).filter(Recognized.user_id == u.id).all()
 
@@ -70,9 +73,76 @@ def main():
         user_info['background'] = u.background
         user_info['total'] = len(u.unique.split('&')) - 1
         user_info['in_library'] = len(user_library)
-
         active_users.append(user_info)
-    return render_template('nav_pages/main.html', active_users=active_users)
+
+    # Треков в библиотеке у пользователей, избранных треков в библиотеке у пользователей (суммарно)
+    in_library_tracks = len(big_library)
+    in_feature_tracks = len([rec for rec in big_library if rec.is_favourite == 1])
+
+    # Всего распознано треков, треков на платформе, исполнителей на платформе (суммарно)
+    recognized_total = sum([track.popularity for track in tracks])
+    track_on_platform = len(tracks)
+    artist_on_platform = len(set([t.artist_id for t in tracks]))
+
+    # Самые популярные треки на платформе (по распознанию)
+    most_popular_tracks = []
+    for track in tracks[:3]:
+        most_popular_tracks.append(track)
+
+    # Самые популярные исполнители на платформе (по количеству распознанных треков на платформе) (+ кол-во треков всего)
+    most_popular_artists = []
+    best_artists_info = dict()
+
+    for track in tracks:
+        artist_shazam_id = track.artist_id
+
+        if artist_shazam_id not in best_artists_info:
+            best_artists_info[artist_shazam_id] = [0, 0]
+        best_artists_info[artist_shazam_id][0] += 1
+        best_artists_info[artist_shazam_id][1] += track.popularity
+    if 0 in best_artists_info:
+        del best_artists_info[0]
+
+    best_artist_shazam_ids = list(sorted(best_artists_info.keys(),
+                                         key=lambda x: best_artists_info[x], reverse=True))[:3]
+
+    for artist_shazam_id in best_artist_shazam_ids:
+        is_artist_on_platform = db_sess.query(Artist).filter(Artist.shazam_id == artist_shazam_id).first()
+
+        if not is_artist_on_platform:
+            background_to_download = []
+            artist_info = get_artist_info(artist_shazam_id)[0]
+            artist_id, artist_title, artist_genre, artist_background = artist_info
+
+            artist = Artist()
+            artist.shazam_id = artist_shazam_id
+            artist.artist = artist_title
+            artist.genre = artist_genre
+
+            if artist_background == UNKNOWN_SONG:
+                artist.background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
+            else:
+                filename = identifier(format_=".png")
+                artist.background = url_for('static', filename=f'img/artist/{filename}')
+                background_to_download.append([filename, artist_background])
+
+            db_sess.add(artist)
+            db_sess.commit()
+            most_popular_artists.append([artist, best_artists_info[artist_shazam_id]])
+            asyncio.run(download_image_handler(
+                background_to_download, 'artist'))
+        else:
+            most_popular_artists.append([is_artist_on_platform, best_artists_info[artist_shazam_id]])
+
+    show_statistics = any([all_users, recognized_total, in_library_tracks, in_feature_tracks,
+                           track_on_platform, artist_on_platform])
+
+    return render_template('nav_pages/main.html',
+                           all_users=all_users, active_users=active_users,
+                           show_statistics=show_statistics, recognized_total=recognized_total,
+                           library_tracks=in_library_tracks, feature_tracks=in_feature_tracks,
+                           track_on_platform=track_on_platform, artist_on_platform=artist_on_platform,
+                           most_popular_tracks=most_popular_tracks, most_popular_artists=most_popular_artists)
 
 
 @app.route('/register', methods=['GET', 'POST'])

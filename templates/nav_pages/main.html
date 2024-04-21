@@ -3,34 +3,139 @@
 
 {% block content %}
     <div style="margin-top: 100px;">
-            <h1 class="top-100-heading"> Топ пользователей </h1>
-        <div class="row">
-            {% for user in active_users %}
-                <div class="col-md-4">
-                    <div class="charts-content-block big-song" style="position: relative;">
-                        <div class="badge badge-primary badge-pill d-flex justify-content-center align-items-center" style="position: absolute; top: 10px; right: 130px; top: 0; font-size: 40px; background-color: transparent; width: 40px; height: 40px; line-height: 40px; text-align: center; border-radius: 50%;">
-                            {% if loop.index == 1 %}
-                                🥇
-                            {% elif loop.index == 2 %}
-                                🥈
-                            {% else %}
-                                🥉
-                            {% endif %}
-                        </div>
-                        <span style="font-size: 24px;"></span>
-                        <img width="200px"
-                             height="200px"
-                             class="charts-song-cover"
-                             src="{{ user.background }}">
+        <h1 class="top-100-heading"> Добро пожаловать на сайт
+            <img src="{{ url_for('static', filename='img/system/shazam.png') }}" width="30" height="30" class="d-inline-block align-top" alt="">
+            PyJam!
+        </h1>
+        <div id="pyjam-statistic">
+            {% if show_statistics %}
+                <h1 class="top-100-heading"> Статистика PyJam </h1>
 
-                        <div style="font-weight: 500">
-                            <p> {{ user.name.capitalize() }} {{ user.surname.capitalize() }}</p>
-                            <p> 🎶 Распознано уникальных треков: {{user.total}}</p>
-                            <p> 📖 Распознанных треков в библиотеке: {{user.in_library}}</p>
+                <h3>
+                    {% if all_users %}
+                        🎩 Зарегистрированных пользователей: {{ all_users }}
+                    {% endif %}
+                 </h3>
+                <h3>
+                    {% if recognized_total %}
+                        🎸 Распознанных треков: {{ recognized_total }}
+                    {% endif %}
+                 </h3>
+                <h3>
+                    {% if library_tracks %}
+                        📚 Треков в библиотеках пользователей: {{ library_tracks }}
+                    {% endif %}
+                </h3>
+                <h3>
+                    {% if feature_tracks %}
+                        ⭐ Избранных треков у пользователей: {{ feature_tracks }}
+                    {% endif %}
+                </h3>
+                <h3>
+                    {% if track_on_platform %}
+                        🎶 Треков на платформе: {{ track_on_platform }}
+                    {% endif %}
+                </h3>
+                <h3>
+                    {% if artist_on_platform %}
+                        🎤 Исполнителей на платформе: {{ artist_on_platform }}
+                    {% endif %}
+                </h3>
+            {% endif %}
+        </div>
+        {% if active_users %}
+            <h1 class="top-100-heading"> Топ пользователей </h1>
+            <div class="row">
+                {% for user in active_users %}
+                    <div class="col-md-4">
+                        <div class="charts-content-block big-song" style="position: relative;">
+                            <div class="badge badge-primary badge-pill d-flex justify-content-center align-items-center" style="position: absolute; top: 10px; right: 130px; top: 0; font-size: 40px; background-color: transparent; width: 40px; height: 40px; line-height: 40px; text-align: center; border-radius: 50%;">
+                                {% if loop.index == 1 %}
+                                    🥇
+                                {% elif loop.index == 2 %}
+                                    🥈
+                                {% else %}
+                                    🥉
+                                {% endif %}
+                            </div>
+                            <span style="font-size: 24px;"></span>
+                            <img width="200px"
+                                 height="200px"
+                                 class="charts-song-cover"
+                                 src="{{ user.background }}">
+
+                            <div style="font-weight: 500">
+                                <p> {{ user.name.capitalize() }} {{ user.surname.capitalize() }}</p>
+                                <p> 🎶 Распознано уникальных треков: {{user.total}}</p>
+                                <p> 📖 Распознанных треков в библиотеке: {{user.in_library}}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
-        </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if most_popular_tracks %}
+            <div class="row">
+                <h1 class="top-100-heading"> Популярные песни на платформе </h1>
+                {% for i in most_popular_tracks %}
+                    <div class="col-md-4">
+                        <div class="charts-content-block big-song" style="position: relative;">
+                            <div class="badge badge-primary badge-pill d-flex justify-content-center align-items-center" style="position: absolute; top: 10px; right: 130px; top: 0; font-size: 40px; background-color: transparent; width: 40px; height: 40px; line-height: 40px; text-align: center; border-radius: 50%;">
+                                {% if loop.index == 1 %}
+                                    🥇
+                                {% elif loop.index == 2 %}
+                                    🥈
+                                {% else %}
+                                    🥉
+                                {% endif %}
+                            </div>
+                            <span style="font-size: 24px;"></span>
+                            <img width="200px"
+                                 height="200px"
+                                 class="charts-song-cover"
+                                 src="{{ i.background }}">
+
+                            <div style="font-weight: 500"><a href="/charts/track/{{ i.id }}">{{ i.track }}</a><br>
+                            <a href="/artist/{{ i.artist_id }}">{{ i.band }}</a><br>
+                            Распознано раз: {{ i.popularity }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <br>
+        {% if most_popular_artists %}
+            <h1 class="top-100-heading"> Популярные артисты</h1>
+            <div class="row" style="margin-top: 10px">
+                {% for i in most_popular_artists %}
+                    <div class="col-md-4">
+                        <div class="charts-content-block big-song" style="position: relative;">
+                            <div class="badge badge-primary badge-pill d-flex justify-content-center align-items-center" style="position: absolute; top: 10px; right: 130px; top: 0; font-size: 40px; background-color: transparent; width: 40px; height: 40px; line-height: 40px; text-align: center; border-radius: 50%;">
+                                {% if loop.index == 1 %}
+                                    🥇
+                                {% elif loop.index == 2 %}
+                                    🥈
+                                {% else %}
+                                    🥉
+                                {% endif %}
+                            </div>
+                            <span style="font-size: 24px;"></span>
+                            <img width="200px"
+                                 height="200px"
+                                 class="charts-song-cover"
+                                 src="{{ i[0].background }}">
+
+                            <div style="font-weight: 500">
+                                <a href="/artist/{{ i[0].shazam_id }}">{{ i[0].artist }}</a><br>
+                                Распознаний: {{ i[1][1] }}<br>
+                                Треков на сайте: {{ i[1][0] }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
 {% endblock %}
