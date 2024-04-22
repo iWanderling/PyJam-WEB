@@ -37,7 +37,6 @@ from data.system_files.constants import *
 # Для удаления загруженных на сервер файлов
 import os
 
-
 # Инициализация приложения:
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'FFFFF0-JHKMQ1-KRMB89-KLLLVV-ZZHMN5'
@@ -49,7 +48,6 @@ api.add_resource(track_json_api.TrackAllJsonAPI, '/api/v1/track')
 
 api.add_resource(artist_json_api.ArtistJsonAPI, '/api/v1/artist/<int:artist_id>')
 api.add_resource(artist_json_api.ArtistAllJsonAPI, '/api/v1/artist')
-
 
 # Инициализация объекта LoginManager, функции для загрузки пользователя:
 login_manager = LoginManager()
@@ -87,7 +85,7 @@ def main():
     # Всего пользователей на платформе, топ-3 самых активных пользователя на платформе:
     all_users = len(users)
     active_users = list()
-    for u in users[:3]:
+    for u in users:
         if u.id > 1:
             user_library = db_sess.query(Recognized).filter(Recognized.user_id == u.id).all()
 
@@ -99,6 +97,8 @@ def main():
             user_info['total'] = len(u.unique.split('&')) - 1
             user_info['in_library'] = len(user_library)
             active_users.append(user_info)
+        if len(active_users) == 3:
+            break
 
     # Треков в библиотеке у пользователей, избранных треков в библиотеке у пользователей (суммарно)
     in_library_tracks = len(big_library)
@@ -170,6 +170,12 @@ def main():
                            most_popular_tracks=most_popular_tracks, most_popular_artists=most_popular_artists)
 
 
+@app.route('/rules')
+def rules():
+    is_admin()
+    return render_template('/information_pages/rules.html')
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def reqister():
     """ Страница для регистрации пользователя """
@@ -191,6 +197,11 @@ def reqister():
             return render_template('/authentication_pages/register.html', title='Регистрация',
                                    form=form,
                                    message="Пароли не совпадают")
+
+        if len(form.name.data) > 41 or len(form.surname.data) > 41:
+            return render_template('/authentication_pages/register.html', title='Регистрация',
+                                   form=form,
+                                   message="Слишком длинное имя / фамилия")
 
         # Создаём сессию, проверяем, существуют ли введённые пользователем данные в БД;
         # Если данные уже есть в базе, то отправляем соответствующее сообщение,
@@ -378,57 +389,60 @@ def charts(country=None, genre=None):
     if country is None and genre is None:
         return redirect('/charts/world')
 
-    data = charts_handler(country=country, genre=genre)
-    background_to_download = list()
-    top = list()
+    try:
+        data = charts_handler(country=country, genre=genre)
+        background_to_download = list()
+        top = list()
 
-    for i in data:
-        if 'shazam_id' in i:
-            existing = db_sess.query(Track).filter(Track.shazam_id == i['shazam_id']).first()
+        for i in data:
+            if 'shazam_id' in i:
+                existing = db_sess.query(Track).filter(Track.shazam_id == i['shazam_id']).first()
 
-            if not existing:
-                track = Track()
-                track.track_key = i['track_key']
-                track.shazam_id = i['shazam_id']
-                track.artist_id = i['artist_id']
-                track.track = i['track']
-                track.band = i['band']
+                if not existing:
+                    track = Track()
+                    track.track_key = i['track_key']
+                    track.shazam_id = i['shazam_id']
+                    track.artist_id = i['artist_id']
+                    track.track = i['track']
+                    track.band = i['band']
 
-                if i['background'] == UNKNOWN_SONG:
-                    track.background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
+                    if i['background'] == UNKNOWN_SONG:
+                        track.background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
+                    else:
+                        filename = identifier(format_=".png")
+                        track.background = url_for('static', filename=f'img/track/{filename}')
+                        background_to_download.append([filename, i['background']])
+
+                    db_sess.add(track)
+                    db_sess.commit()
+                    top.append(track)
+
                 else:
-                    filename = identifier(format_=".png")
-                    track.background = url_for('static', filename=f'img/track/{filename}')
-                    background_to_download.append([filename, i['background']])
-
-                db_sess.add(track)
-                db_sess.commit()
-                top.append(track)
-
+                    top.append(db_sess.query(Track).filter(Track.shazam_id == i['shazam_id']).first())
             else:
-                top.append(db_sess.query(Track).filter(Track.shazam_id == i['shazam_id']).first())
-        else:
-            none_track = Track()
-            none_track.id = 0
-            none_track.track_key = 0
-            none_track.shazam_id = 0
-            none_track.artist_id = 0
-            none_track.track = i['track']
-            none_track.band = i['band']
-            none_track.background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
-            top.append(none_track)
+                none_track = Track()
+                none_track.id = 0
+                none_track.track_key = 0
+                none_track.shazam_id = 0
+                none_track.artist_id = 0
+                none_track.track = i['track']
+                none_track.band = i['band']
+                none_track.background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
+                top.append(none_track)
 
-    if genre is None:
-        genre = 'Все жанры'
+        if genre is None:
+            genre = 'Все жанры'
 
-    available_genres = AVAILABLE_GENRES[country]
+        available_genres = AVAILABLE_GENRES[country]
 
-    if background_to_download:
-        asyncio.run(download_image_handler(background_to_download, 'track'))
-    return render_template('/nav_pages/charts.html', top=top, available_genres=available_genres,
-                           country=country_list[country], country_code=country, genres_list=genres_list,
-                           genre_type=genres_list[genre])
-
+        if background_to_download:
+            asyncio.run(download_image_handler(background_to_download, 'track'))
+        return render_template('/nav_pages/charts.html', top=top, available_genres=available_genres,
+                               country=country_list[country], country_code=country, genres_list=genres_list,
+                               genre_type=genres_list[genre])
+    except Exception as e:
+        status_error = e
+        return render_template('/nav_pages/charts.html', top=[])
 
 @app.route('/recognize/track/<int:track_id>')
 @app.route('/charts/track/<int:track_id>')
@@ -541,7 +555,6 @@ def download_artist(artist_id):
 
 @app.route('/artist/<int:artist_id>')
 def about_artist(artist_id):
-
     if not artist_id:
         return render_template('/information_pages/about_artist.html')
 
@@ -704,6 +717,10 @@ def edit_cabinet():
                 return render_template('/user_pages/cabinet_edit.html', form=form,
                                        message="Такой пользователь уже существует")
 
+            if len(form.name.data) > 41 or len(form.surname.data) > 41:
+                return render_template('/user_pages/cabinet_edit.html', form=form,
+                                       message="Слишком длинное имя / фамилия")
+
             user = db_sess.query(User).filter(User.id == current_user.id).first()
             user.email = form.email.data
             user.surname = form.surname.data
@@ -827,16 +844,17 @@ def admin_reset_user(user_id):
 
     user = db_sess.query(User).filter(User.id == user_id).first()
 
-    user.warns += 1
-    user.name = 'Пользователь'
-    user.surname = f"{user.id}"
+    if user:
+        user.warns += 1
+        user.name = 'Пользователь'
+        user.surname = f"{user.id}"
 
-    if user.gender == 'Мужской':
-        user.background = url_for('static', filename=MAN_PROFILE_PICTURE)
-    else:
-        user.background = url_for('static', filename=WOMAN_PROFILE_PICTURE)
+        if user.gender == 'Мужской':
+            user.background = url_for('static', filename=MAN_PROFILE_PICTURE)
+        else:
+            user.background = url_for('static', filename=WOMAN_PROFILE_PICTURE)
 
-    db_sess.commit()
+        db_sess.commit()
     return redirect('/administrator')
 
 
@@ -846,9 +864,10 @@ def admin_undo_warn(user_id):
 
     user = db_sess.query(User).filter(User.id == user_id).first()
 
-    if user.warns > 0:
-        user.warns -= 1
-    db_sess.commit()
+    if user:
+        if user.warns > 0:
+            user.warns -= 1
+        db_sess.commit()
 
     return redirect('/administrator')
 
@@ -859,12 +878,13 @@ def admin_delete_user(user_id):
 
     user = db_sess.query(User).filter(User.id == user_id).first()
 
-    if user.warns >= 3:
-        recognized_by_user = db_sess.query(Recognized).filter(Recognized.user_id == user.id).all()
-        for rec in recognized_by_user:
-            db_sess.delete(recognized_by_user)
-        db_sess.delete(user)
-        db_sess.commit()
+    if user:
+        if user.warns >= 3:
+            recognized_by_user = db_sess.query(Recognized).filter(Recognized.user_id == user.id).all()
+            for rec in recognized_by_user:
+                db_sess.delete(recognized_by_user)
+            db_sess.delete(user)
+            db_sess.commit()
     return redirect('/administrator')
 
 

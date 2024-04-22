@@ -115,57 +115,62 @@
 
 
 
-<div class="row">
-    {% for i in top[:3] %}
-    <div class="col-md-4">
-        <div class="charts-content-block big-song" style="position: relative;">
-            <div class="badge badge-primary badge-pill d-flex justify-content-center align-items-center"
-                 style="position: absolute; top: 10px; right: 0px; top: 0; font-size: 60px; background-color: transparent; width: 40px; height: 60px; line-height: 40px; text-align: center; border-radius: 50%;">
-                {% if loop.index == 1 %}
-                🥇
-                {% elif loop.index == 2 %}
-                🥈
-                {% else %}
-                🥉
-                {% endif %}
-            </div>
-            <span style="font-size: 24px;"></span>
-            <a href="/charts/track/{{ i.id }}" class="charts-song-link">
-                <img class="charts-song-cover"
-                     src="{{ i.background }}"
-                     alt="Обложка трека">
-            </a>
+{% if top %}
+    <div class="row">
+        {% for i in top[:3] %}
+        <div class="col-md-4">
+            <div class="charts-content-block big-song" style="position: relative;">
+                <div class="badge badge-primary badge-pill d-flex justify-content-center align-items-center"
+                     style="position: absolute; top: 10px; right: 0px; top: 0; font-size: 60px; background-color: transparent; width: 40px; height: 60px; line-height: 40px; text-align: center; border-radius: 50%;">
+                    {% if loop.index == 1 %}
+                    🥇
+                    {% elif loop.index == 2 %}
+                    🥈
+                    {% else %}
+                    🥉
+                    {% endif %}
+                </div>
+                <span style="font-size: 24px;"></span>
+                <a href="/charts/track/{{ i.id }}" class="charts-song-link">
+                    <img class="charts-song-cover"
+                         src="{{ i.background }}"
+                         alt="Обложка трека">
+                </a>
 
-            <div class="charts-song-info">
-                <a href="/charts/track/{{ i.id }}" class="charts-song-link track-title">{{ i.track }}</a><br>
-                <a href="/artist/shazam_id/{{ i.artist_id }}" class="artist-name">{{ i.band }}</a>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-
-<div class="row">
-    {% for i in top[3:] %}
-    {% if loop.index % 4 == 1 %}
-</div>
-<div class="row">
-    {% endif %}
-    <div class="col-md-3" style="margin-bottom: 0px;">
-        <div class="charts-content-block">
-            <a href="/charts/track/{{ i.id }}" class="charts-song-link">
-                <img class="charts-song-cover"
-                     src="{{ i.background }}"
-                     alt="Обложка трека">
-            </a>
-
-            <div class="charts-song-info">
-                <a href="/charts/track/{{ i.id }}" class="charts-song-link " style="font-size: 20px; font-weight: bold;">{{loop.index + 3}}. {{ i.track }}</a><br>
-                <a href="/artist/shazam_id/{{ i.artist_id }}" style="font-size: 15px; color: black;">{{ i.band }}</a>
+                <div class="charts-song-info">
+                    <a href="/charts/track/{{ i.id }}" class="charts-song-link track-title">{{ i.track }}</a><br>
+                    <a href="/artist/shazam_id/{{ i.artist_id }}" class="artist-name">{{ i.band }}</a>
+                </div>
             </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
-</div>
-</div>
+
+    <div class="row">
+        {% for i in top[3:] %}
+        {% if loop.index % 4 == 1 %}
+    </div>
+    <div class="row">
+        {% endif %}
+        <div class="col-md-3" style="margin-bottom: 0px;">
+            <div class="charts-content-block">
+                <a href="/charts/track/{{ i.id }}" class="charts-song-link">
+                    <img class="charts-song-cover"
+                         src="{{ i.background }}"
+                         alt="Обложка трека">
+                </a>
+
+                <div class="charts-song-info">
+                    <a href="/charts/track/{{ i.id }}" class="charts-song-link " style="font-size: 20px; font-weight: bold;">{{loop.index + 3}}. {{ i.track }}</a><br>
+                    <a href="/artist/shazam_id/{{ i.artist_id }}" style="font-size: 15px; color: black;">{{ i.band }}</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    </div>
+{% else %}
+    <h1 class="top-100-heading"> На сервере возникли технические шоколадки. Скоро мы всё исправим! </h1>
+
+{% endif %}
 {% endblock %}
