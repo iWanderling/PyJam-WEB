@@ -3,6 +3,7 @@ from random import choice
 import string
 
 
+# Количество треков, которые нужно отобразить в топе:
 LIMIT_CONSTANT = 100
 
 
@@ -14,6 +15,8 @@ def identifier(format_):
     return ''.join([choice(abc) for _ in range(17)]) + format_
 
 
+# Получение текущей даты формата: [день] [месяц], [время], [год].
+# Применяется, в основном, в ORM-классах для получения текущей даты с целью её записи в БД:
 def get_valid_date():
     date = datetime.now()
     months = {
@@ -58,6 +61,7 @@ country_list = {
     'CH': 'Швейцария'
 }
 
+# Жанры:
 genres_list = {
     'Все жанры': 'Все жанры',
     'pop': 'Поп',
@@ -70,6 +74,7 @@ genres_list = {
     'rap-hip-hop': "Хип-хоп / Рэп"
 }
 
+# Доступные жанры для каждой страны (применяется на странице хит-парадов)
 AVAILABLE_GENRES = {
     'world': ['alternative', 'pop', 'rock', 'dance', 'electronic', 'country', 'afro', 'rap-hip-hop'],
     'AU': ['alternative', 'pop', 'rock', 'dance', 'electronic', 'country', 'afro', 'rap-hip-hop'],
@@ -90,6 +95,7 @@ AVAILABLE_GENRES = {
     'CH': []
 }
 
+# Изображения
 UNKNOWN_SONG = 'unknown_song.png'
 MAN_PROFILE_PICTURE = 'img/user_profile/man.png'
 WOMAN_PROFILE_PICTURE = 'img/user_profile/woman.png'

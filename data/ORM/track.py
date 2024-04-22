@@ -4,14 +4,19 @@ from sqlalchemy import orm
 import sqlalchemy
 
 
+# Класс для создания таблицы со всеми треками:
 class Track(SqlAlchemyBase, SerializerMixin):
     __tablename__ = 'tracks'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     shazam_id = sqlalchemy.Column(sqlalchemy.Integer)  # ID песни в Shazam
-    track_key = sqlalchemy.Column(sqlalchemy.Integer)  # KEY (ключ) для особой работы с ShazamAPI (поиск похожих треков)
+
+    # KEY (ключ) для особой работы с ShazamAPI (поиск похожих треков)
+    track_key = sqlalchemy.Column(sqlalchemy.Integer)
+
     # ID исполнителя данной песни
     artist_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("artists.shazam_id"))
+
     track = sqlalchemy.Column(sqlalchemy.String)  # Название песни
     band = sqlalchemy.Column(sqlalchemy.String)  # Название исполнителя
     background = sqlalchemy.Column(sqlalchemy.String)  # Ссылка на изображение

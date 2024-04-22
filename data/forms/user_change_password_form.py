@@ -3,6 +3,7 @@ from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 
 
+# Форма для изменения пароля:
 class ChangePasswordForm(FlaskForm):
     current_password = PasswordField('Текущий пароль', validators=[DataRequired()])
     new_password = PasswordField('Новый пароль', validators=[DataRequired()])

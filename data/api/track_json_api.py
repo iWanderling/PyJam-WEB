@@ -1,3 +1,4 @@
+""" REST-API для сбора JSON-файла с данными о треках на платформе """
 from flask_restful import Resource, Api, abort
 from flask_login import current_user
 from data.ORM.track import Track
@@ -6,7 +7,7 @@ from flask import jsonify
 import requests
 
 
-# Возврат сообщения о работе сервера
+# Возврат сообщения о работе сервера:
 def abort_404(track_id):
     session = db_session.create_session()
     track = session.query(Track).get(track_id)
@@ -14,9 +15,13 @@ def abort_404(track_id):
         abort(404)
 
 
+# Класс REST-API для сбора данных об одном треке с ID в БД: [track_id]:
 class TrackJsonAPI(Resource):
     def get(self, track_id):
+        # Проверяем существование трека с ID [track_id]:
         abort_404(track_id)
+
+        # Создаём сессию, загружаем информацию и отправляем её:
         session = db_session.create_session()
         track = session.query(Track).get(track_id)
 
@@ -30,8 +35,12 @@ class TrackJsonAPI(Resource):
 
         return jsonify({'track': get_data})
 
+
+# Класс REST-API для сбора данных о всех треках на платформе:
 class TrackAllJsonAPI(Resource):
     def get(self):
+
+        # Создаём сессию, загружаем информацию и отправляем её:
         session = db_session.create_session()
         tracks = session.query(Track).all()
 

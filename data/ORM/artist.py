@@ -4,6 +4,7 @@ from sqlalchemy import orm
 import sqlalchemy
 
 
+# Класс для создания таблицы с исполнителями:
 class Artist(SqlAlchemyBase, SerializerMixin):
     __tablename__ = 'artists'
 

@@ -1,5 +1,4 @@
 from data.system_files.constants import get_valid_date
-
 from sqlalchemy_serializer import SerializerMixin
 from .db_session import SqlAlchemyBase
 from datetime import datetime
@@ -7,6 +6,7 @@ from sqlalchemy import orm
 import sqlalchemy
 
 
+# Класс для создания таблицы с распознанными треками:
 class Recognized(SqlAlchemyBase, SerializerMixin):
     __tablename__ = 'recognized'
 

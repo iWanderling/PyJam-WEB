@@ -1,3 +1,4 @@
+""" REST-API для сбора JSON-файла с данными об исполнителях на платформе """
 from flask_restful import Resource, Api, abort
 from data.ORM.artist import Artist
 from data.ORM.track import Track
@@ -6,7 +7,7 @@ from flask import jsonify
 import requests
 
 
-# Возврат сообщения о работе сервера
+# Возврат сообщения о работе сервера:
 def abort_404(artist_id):
     session = db_session.create_session()
     artist = session.query(Artist).get(artist_id)
@@ -14,9 +15,14 @@ def abort_404(artist_id):
         abort(404)
 
 
+# Класс REST-API для сбора данных об одном исполнителе с ID в БД: [artist_id]:
 class ArtistJsonAPI(Resource):
     def get(self, artist_id):
+
+        # Проверяем существование исполнителя с ID [artist_id]:
         abort_404(artist_id)
+
+        # Создаём сессию, загружаем информацию и отправляем её:
         session = db_session.create_session()
         artist = session.query(Artist).get(artist_id)
 
@@ -32,8 +38,12 @@ class ArtistJsonAPI(Resource):
         get_data['track_on_platform'] = len(session.query(Track).filter(Track.artist_id == artist.shazam_id).all())
         return jsonify({'artist': get_data})
 
+
+# Класс REST-API для сбора данных о всех исполнителях на платформе:
 class ArtistAllJsonAPI(Resource):
     def get(self):
+
+        # Создаём сессию, загружаем информацию и отправляем её:
         session = db_session.create_session()
         artists = session.query(Artist).all()
 

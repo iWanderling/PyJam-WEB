@@ -4,6 +4,7 @@ from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 
 
+# Форма для изменения личных данных:
 class UserForm(FlaskForm):
     email = EmailField('Изменить E-Mail', validators=[DataRequired()])
     surname = StringField('Изменить фамилию', validators=[DataRequired()])
