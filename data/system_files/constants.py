@@ -1,3 +1,4 @@
+from datetime import datetime
 from random import choice
 import string
 
@@ -11,6 +12,29 @@ def identifier(format_):
         одновременно распознают разные файлы и их нужно распознать по отдельности) """
     abc = string.ascii_lowercase + string.ascii_uppercase + string.digits
     return ''.join([choice(abc) for _ in range(17)]) + format_
+
+
+def get_valid_date():
+    date = datetime.now()
+    months = {
+        '01': 'января',
+        '02': 'февраля',
+        '03': 'марта',
+        '04': 'апреля',
+        '05': 'мая',
+        '06': 'июня',
+        '07': 'июля',
+        '08': 'августа',
+        '09': 'сентября',
+        '10': 'октября',
+        '11': 'ноября',
+        '12': 'декабря'
+    }
+    date = str(date).split()
+    year, month, day = date[0].split('-')
+    time = ':'.join(date[1].split(':')[:2])
+
+    return f'{day} {months[month]}, {time}, {year}'
 
 
 # Список стран и их кодов:
@@ -67,3 +91,5 @@ AVAILABLE_GENRES = {
 }
 
 UNKNOWN_SONG = 'unknown_song.png'
+MAN_PROFILE_PICTURE = 'img/user_profile/man.png'
+WOMAN_PROFILE_PICTURE = 'img/user_profile/woman.png'

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %} Администратор {% endblock %}
+
+{% block content %}
+    <div class="admin-cabinet-heading" style="margin-top: 100px">
+        <h1> Кабинет Администратора </h1>
+    </div>
+    <div class="admin-users-field" style="margin-top: 30px">
+
+        {% for user in users %}
+            <div class="admin-user-content">
+                <img width="200px" height="200px"  class="charts-song-cover"  src="{{ user.background }}">
+                <div>
+                    {{ user.name }}
+                    {{ user.surname }}
+                </div>
+                <div class="" style="margin-top: 15px;">
+                    <a class="btn btn-danger" href="/administrator/reset_user/{{user.id}}">
+                        Обнулить данные
+                    </a>
+                    <a class="btn btn-dark" href="administrator/delete_user/{{user.id}}">
+                        Удалить
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

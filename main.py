@@ -1,6 +1,8 @@
 # Модули для работы с Flask
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask import Flask, render_template, redirect, request, url_for
+from flask_restful import Api, abort
+
 from urllib.parse import urlparse
 import asyncio
 
@@ -17,6 +19,10 @@ from data.forms.register_form import RegisterForm
 from data.forms.login_form import LoginForm
 from data.forms.user_form import UserForm
 
+# API-формы:
+from data.api import artist_json_api
+from data.api import track_json_api
+
 # ORM-модели
 from data.ORM import db_session
 from data.ORM.recognized import Recognized
@@ -31,9 +37,19 @@ from data.system_files.constants import *
 # Для удаления загруженных на сервер файлов
 import os
 
+
 # Инициализация приложения:
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'FFFFF0-JHKMQ1-KRMB89-KLLLVV-ZZHMN5'
+
+api = Api(app)
+
+api.add_resource(track_json_api.TrackJsonAPI, '/api/v1/track/<int:track_id>')
+api.add_resource(track_json_api.TrackAllJsonAPI, '/api/v1/track')
+
+api.add_resource(artist_json_api.ArtistJsonAPI, '/api/v1/artist/<int:artist_id>')
+api.add_resource(artist_json_api.ArtistAllJsonAPI, '/api/v1/artist')
+
 
 # Инициализация объекта LoginManager, функции для загрузки пользователя:
 login_manager = LoginManager()
@@ -48,9 +64,16 @@ def load_user(user_id):
 
 
 @app.errorhandler(401)
+@app.errorhandler(403)
 @app.errorhandler(404)
 def page_error_code(e):
-    return render_template('handlers/error_handler.html', error_status=e)
+    return render_template('handlers/error_handler.html', error_status=f'Ошибка: {e}')
+
+
+def is_admin():
+    is_admin = current_user.is_authenticated and current_user.id == 1
+    if not is_admin:
+        return abort(403)
 
 
 @app.route('/', methods=["GET", "POST"])
@@ -65,15 +88,17 @@ def main():
     all_users = len(users)
     active_users = list()
     for u in users[:3]:
-        user_library = db_sess.query(Recognized).filter(Recognized.user_id == u.id).all()
+        if u.id > 1:
+            user_library = db_sess.query(Recognized).filter(Recognized.user_id == u.id).all()
 
-        user_info = dict()
-        user_info['name'] = u.name
-        user_info['surname'] = u.surname
-        user_info['background'] = u.background
-        user_info['total'] = len(u.unique.split('&')) - 1
-        user_info['in_library'] = len(user_library)
-        active_users.append(user_info)
+            user_info = dict()
+            user_info['id'] = u.id
+            user_info['name'] = u.name
+            user_info['surname'] = u.surname
+            user_info['background'] = u.background
+            user_info['total'] = len(u.unique.split('&')) - 1
+            user_info['in_library'] = len(user_library)
+            active_users.append(user_info)
 
     # Треков в библиотеке у пользователей, избранных треков в библиотеке у пользователей (суммарно)
     in_library_tracks = len(big_library)
@@ -184,9 +209,9 @@ def reqister():
         user.gender = form.gender.data
 
         if user.gender == 'Мужской':
-            user.background = url_for('static', filename='img/user_profile/man.png')
+            user.background = url_for('static', filename=MAN_PROFILE_PICTURE)
         else:
-            user.background = url_for('static', filename='img/user_profile/woman.png')
+            user.background = url_for('static', filename=WOMAN_PROFILE_PICTURE)
 
         # Шифруем пароль пользователя и регистрируем его:
         user.set_password(form.password.data)
@@ -412,9 +437,8 @@ def track_info(track_id):
     """ Вернуть страницу с информацией о треке """
 
     o = urlparse(request.base_url)
-    hostname = o.hostname
-
     link = f'{o.netloc}/track/{track_id}'
+
     # Если трек не удалось распознать, то ничего не отправляем на вывод:
     if track_id == 0:
         return render_template('/information_pages/track.html')
@@ -474,18 +498,13 @@ def similiar_songs(track_id):
 def track_to_artist(track_id):
     track = db_sess.query(Track).filter(Track.id == track_id).first()
     artist_shazam_id = track.artist_id
-    return redirect(f'/artist/{artist_shazam_id}')
+    return redirect(f'/artist/shazam_id/{artist_shazam_id}')
 
 
-@app.route('/artist/<int:artist_id>')
-def about_artist(artist_id):
+@app.route('/artist/shazam_id/<int:artist_id>')
+def download_artist(artist_id):
     """ Вернуть страницу с информацией об исполнителе трека """
     artist_shazam_id = artist_id
-
-    o = urlparse(request.base_url)
-    hostname = o.hostname
-    link = f'{o.netloc}/artist/{artist_shazam_id}'
-
     artist_existing = db_sess.query(Artist).filter(Artist.shazam_id == artist_shazam_id).first()
 
     if not artist_existing:
@@ -515,6 +534,23 @@ def about_artist(artist_id):
             background_to_download, 'artist'))
 
     artist = db_sess.query(Artist).filter(Artist.shazam_id == artist_shazam_id).first()
+    artist_db_id = artist.id
+
+    return redirect(f'/artist/{artist_db_id}')
+
+
+@app.route('/artist/<int:artist_id>')
+def about_artist(artist_id):
+
+    if not artist_id:
+        return render_template('/information_pages/about_artist.html')
+
+    o = urlparse(request.base_url)
+    link = f'{o.netloc}/artist/{artist_id}'
+
+    artist = db_sess.query(Artist).filter(Artist.id == artist_id).first()
+    artist_shazam_id = artist.shazam_id
+
     best_artist_tracks = get_artist_info(artist_shazam_id)[1]
     best_tracks = list()
     background_to_download = []
@@ -613,20 +649,23 @@ def cabinet():
         users = db_sess.query(User).all()
         user = db_sess.query(User).filter(User.id == current_user.id).first()
 
+        user_unique_total = len(user.unique.split('&')) - 1
+        user_in_library = len(db_sess.query(Recognized).filter(Recognized.user_id == user.id).all())
+        user_in_featured = len(db_sess.query(Recognized).filter(Recognized.user_id == user.id,
+                                                                Recognized.is_favourite == 1).all())
+        user_in_top = list(sorted(users, key=lambda u: len(u.unique.split('&')), reverse=True)).index(user) + 1
+
         if request.method == 'GET':
-            user_unique_total = len(user.unique.split('&')) - 1
-            user_in_library = len(db_sess.query(Recognized).filter(Recognized.user_id == user.id).all())
-            user_in_featured = len(db_sess.query(Recognized).filter(Recognized.user_id == user.id,
-                                                                    Recognized.is_favourite == 1).all())
-            user_in_top = list(sorted(users, key=lambda u: len(u.unique.split('&')), reverse=True)).index(user) + 1
             return render_template('/user_pages/cabinet.html', rec_count=user_unique_total,
                                    library_count=user_in_library, featured_count=user_in_featured,
-                                   intop_position=user_in_top)
+                                   intop_position=user_in_top, date=user.date)
 
         elif request.method == 'POST':
             f = request.files['file']
             if not f.filename:
-                return render_template('/user_pages/cabinet.html', message='Вы не отправили файл')
+                return render_template('/user_pages/cabinet.html', rec_count=user_unique_total,
+                                       library_count=user_in_library, featured_count=user_in_featured,
+                                       intop_position=user_in_top, date=user.date)
             file_path = 'static/img/user_profile/' + identifier(format_='.png')
             f.save(file_path)
             user.background = file_path
@@ -756,10 +795,51 @@ def delete_profile():
     return render_template('/user_pages/delete_profile.html')
 
 
+@app.route('/user/<int:user_id>')
+def user_information(user_id):
+    user = db_sess.query(User).filter(User.id == user_id).first()
+
+    if user and user.id > 1:
+        o = urlparse(request.base_url)
+        link = f'{o.netloc}/user/{user_id}'
+
+        recognized_total = len(user.unique.split('&')) - 1
+        user_lib = db_sess.query(Recognized).filter(Recognized.user_id == user.id).all()
+        in_library = len(user_lib)
+        in_featured = len([1 for u in user_lib if u.is_favourite == 1])
+
+        return render_template('/information_pages/about_user.html', user=user,
+                               in_library=in_library, in_featured=in_featured,
+                               recognized_total=recognized_total, link=link)
+    return render_template('/information_pages/about_user.html')
+
+
+@app.route('/administrator')
+def administrator():
+    is_admin()
+
+    users = [u for u in db_sess.query(User).all() if u.id > 0]
+    return render_template('/admin_page/admin.html', users=users)
+
+
+@app.route('/administrator/reset_user/<int:user_id>')
+def admin_reset_user(user_id):
+    is_admin()
+
+    user = db_sess.query(User).filter(user.id == user_id).first()
+
+    user.name = 'Пользователь'
+    user.surname = f"{user.id}"
+    user.background = url_for('static', filename=f'img/static/img/system/{UNKNOWN_SONG}')
+    user.unique = ""
+    user.unique_total = 0
+
+
 if __name__ == '__main__':
     db_session.global_init("db/PyJam.db")
     db_sess = db_session.create_session()
-    if os.name == 'nt':
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    policy = asyncio.WindowsSelectorEventLoopPolicy()
+    asyncio.set_event_loop_policy(policy)
 
     app.run(debug=True)

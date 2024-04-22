@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %} Главная {% endblock %}
+{% block title %} Похожие песни {% endblock %}
 {% block content %}
 {% if similiar_tracks %}
 
@@ -9,7 +9,7 @@
         <figcaption style="margin-left: 20px; align-self: flex-start;">
             <b><a href="/track/{{ track_owner.id }}" style="font-size: 30px; color: #007bff;">{{ track_owner.track
                 }}</a></b> <br>
-            <a href="/artist/{{ track_owner.artist_id }}" style="font-size: 18px; color: black;">{{ track_owner.band
+            <a href="/artist/shazam_id/{{ track_owner.artist_id }}" style="font-size: 18px; color: black;">{{ track_owner.band
                 }}</a>
         </figcaption>
     </figure>
@@ -28,7 +28,7 @@
                 </a>
                 <div style="font-weight: 500; margin-top: 15px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                     <a href="/track/{{ track.id }}">{{ track.track }}</a><br>
-                    <a href="/artist/{{ track.artist_id }}">{{ track.band }}</a>
+                    <a href="/artist/shazam_id/{{ track.artist_id }}">{{ track.band }}</a>
                 </div>
             </div>
         </div>

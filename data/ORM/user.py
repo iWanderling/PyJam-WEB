@@ -1,11 +1,11 @@
+from data.system_files.constants import get_valid_date
+from .db_session import SqlAlchemyBase
+
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy_serializer import SerializerMixin
 from flask_login import UserMixin
 import sqlalchemy
 import datetime
-
-
-from .db_session import SqlAlchemyBase
 
 
 class User(SqlAlchemyBase, UserMixin, SerializerMixin):
@@ -20,6 +20,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     unique = sqlalchemy.Column(sqlalchemy.String, default='')
     unique_total = sqlalchemy.Column(sqlalchemy.Integer, default=0)
     background = sqlalchemy.Column(sqlalchemy.String)
+    date = sqlalchemy.Column(sqlalchemy.String, default=get_valid_date)
 
     # Кэшировать пароль
     def set_password(self, password):

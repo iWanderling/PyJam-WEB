@@ -1,31 +1,10 @@
+from data.system_files.constants import get_valid_date
+
 from sqlalchemy_serializer import SerializerMixin
 from .db_session import SqlAlchemyBase
 from datetime import datetime
 from sqlalchemy import orm
 import sqlalchemy
-
-
-def get_valid_date():
-    date = datetime.now()
-    months = {
-        '01': 'января',
-        '02': 'февраля',
-        '03': 'марта',
-        '04': 'апреля',
-        '05': 'мая',
-        '06': 'июня',
-        '07': 'июля',
-        '08': 'августа',
-        '09': 'сентября',
-        '10': 'октября',
-        '11': 'ноября',
-        '12': 'декабря'
-    }
-    date = str(date).split()
-    year, month, day = date[0].split('-')
-    time = ':'.join(date[1].split(':')[:2])
-
-    return f'{day} {months[month]}, {time}, {year}'
 
 
 class Recognized(SqlAlchemyBase, SerializerMixin):

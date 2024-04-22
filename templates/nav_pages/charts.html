@@ -138,7 +138,7 @@
 
             <div class="charts-song-info">
                 <a href="/charts/track/{{ i.id }}" class="charts-song-link track-title">{{ i.track }}</a><br>
-                <a href="/artist/{{ i.artist_id }}" class="artist-name">{{ i.band }}</a>
+                <a href="/artist/shazam_id/{{ i.artist_id }}" class="artist-name">{{ i.band }}</a>
             </div>
         </div>
     </div>
@@ -161,7 +161,7 @@
 
             <div class="charts-song-info">
                 <a href="/charts/track/{{ i.id }}" class="charts-song-link " style="font-size: 20px; font-weight: bold;">{{loop.index + 3}}. {{ i.track }}</a><br>
-                <a href="/artist/{{ i.artist_id }}" style="font-size: 15px; color: black;">{{ i.band }}</a>
+                <a href="/artist/shazam_id/{{ i.artist_id }}" style="font-size: 15px; color: black;">{{ i.band }}</a>
             </div>
         </div>
     </div>
