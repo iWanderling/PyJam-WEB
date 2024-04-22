@@ -817,7 +817,6 @@ def user_information(user_id):
 @app.route('/administrator')
 def administrator():
     is_admin()
-
     users = [u for u in db_sess.query(User).all() if u.id > 0]
     return render_template('/admin_page/admin.html', users=users)
 
@@ -826,13 +825,47 @@ def administrator():
 def admin_reset_user(user_id):
     is_admin()
 
-    user = db_sess.query(User).filter(user.id == user_id).first()
+    user = db_sess.query(User).filter(User.id == user_id).first()
 
+    user.warns += 1
     user.name = 'Пользователь'
     user.surname = f"{user.id}"
-    user.background = url_for('static', filename=f'img/static/img/system/{UNKNOWN_SONG}')
-    user.unique = ""
-    user.unique_total = 0
+
+    if user.gender == 'Мужской':
+        user.background = url_for('static', filename=MAN_PROFILE_PICTURE)
+    else:
+        user.background = url_for('static', filename=WOMAN_PROFILE_PICTURE)
+
+    db_sess.commit()
+    return redirect('/administrator')
+
+
+@app.route('/administrator/undo_warn/<int:user_id>')
+def admin_undo_warn(user_id):
+    is_admin()
+
+    user = db_sess.query(User).filter(User.id == user_id).first()
+
+    if user.warns > 0:
+        user.warns -= 1
+    db_sess.commit()
+
+    return redirect('/administrator')
+
+
+@app.route('/administrator/delete_user/<int:user_id>')
+def admin_delete_user(user_id):
+    is_admin()
+
+    user = db_sess.query(User).filter(User.id == user_id).first()
+
+    if user.warns >= 3:
+        recognized_by_user = db_sess.query(Recognized).filter(Recognized.user_id == user.id).all()
+        for rec in recognized_by_user:
+            db_sess.delete(recognized_by_user)
+        db_sess.delete(user)
+        db_sess.commit()
+    return redirect('/administrator')
 
 
 if __name__ == '__main__':

@@ -87,7 +87,7 @@
         }
     </style>
     <div style="margin-top: 100px;">
-        {% if current_user.is_authenticated %}
+        {% if current_user.is_authenticated and current_user.id > 1%}
             <div class="login-form {% if form.email.errors or form.password.errors or form.repeat_password.errors %}error-field{% endif %}">
                 <h1>Удаление аккаунта</h1>
                 <form action="" method="post" novalidate>
@@ -129,8 +129,10 @@
                 </form>
                 <h2 style="padding-top: 50px">{{ message }}</h2>
             </div>
+        {% elif current_user.id == 1%}
+            <h2> Администраторам запрещено удалять свой аккаунт </h2>
         {% else %}
-            <h2> Вы не можете удалить свой аккаунт - у вас его нет!</h2>
+            <h2> Вы не можете этого сделать - у вас нет аккаунта... </h2>
         {% endif %}
     </div>
 {% endblock %}

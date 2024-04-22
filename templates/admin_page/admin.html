@@ -8,21 +8,34 @@
     <div class="admin-users-field" style="margin-top: 30px">
 
         {% for user in users %}
-            <div class="admin-user-content">
-                <img width="200px" height="200px"  class="charts-song-cover"  src="{{ user.background }}">
-                <div>
-                    {{ user.name }}
-                    {{ user.surname }}
+            {% if user.id > 1 %}
+                <div class="admin-user-content" style="margin-bottom: 50px">
+                    <img width="200px" height="200px"  class="charts-song-cover"  src="{{ user.background }}">
+                    <div>
+                        {% if user.gender == "Мужской" %} 👨
+                        {% else %} 👩
+                        {% endif %}
+                        <a href="/user/{{ user.id }}">
+                            {{ user.name }} {{ user.surname }}
+                        </a>
+                        <p> ❌ Количество предупреждений: {{ user.warns }}</p>
+                    </div>
+                    <div class="" style="margin-top: 15px;">
+                        <a class="btn btn-primary" href="/user/{{user.id}}">
+                            Информация
+                        </a>
+                        <a class="btn btn-danger" href="/administrator/reset_user/{{user.id}}">
+                            Очистить оформление
+                        </a>
+                        <a class="btn btn-success" href="/administrator/undo_warn/{{user.id}}">
+                            Снять предупреждение
+                        </a>
+                        <a class="btn btn-dark" href="administrator/delete_user/{{user.id}}">
+                            Удалить
+                        </a>
+                    </div>
                 </div>
-                <div class="" style="margin-top: 15px;">
-                    <a class="btn btn-danger" href="/administrator/reset_user/{{user.id}}">
-                        Обнулить данные
-                    </a>
-                    <a class="btn btn-dark" href="administrator/delete_user/{{user.id}}">
-                        Удалить
-                    </a>
-                </div>
-            </div>
+            {% endif %}
         {% endfor %}
     </div>
 {% endblock %}

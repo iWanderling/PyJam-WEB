@@ -40,7 +40,11 @@
                 <a class="btn btn-primary" href="/cabinet/edit"> Редактировать данные </a>
                 <a class="btn btn-success" href="/cabinet/change-password"> Сменить пароль </a>
                 <a class="btn btn-danger" href="/logout"> Выйти из аккаунта </a>
-                <a class="btn btn-dark" href="/cabinet/delete_profile"> Удалить аккаунт </a>
+                {% if current_user.id == 1 %}
+                    <a class="btn btn-dark" href="/administrator"> Кабинет Администратора </a>
+                {% else %}
+                    <a class="btn btn-dark" href="/cabinet/delete_profile"> Удалить аккаунт </a>
+                {% endif %}
             </div>
             <div style="margin-top: 20px">
                 <div class="charts-content-block big-song" style="position: relative;">

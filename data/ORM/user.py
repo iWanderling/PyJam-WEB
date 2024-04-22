@@ -21,6 +21,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     unique_total = sqlalchemy.Column(sqlalchemy.Integer, default=0)
     background = sqlalchemy.Column(sqlalchemy.String)
     date = sqlalchemy.Column(sqlalchemy.String, default=get_valid_date)
+    warns = sqlalchemy.Column(sqlalchemy.Integer, default=0)  # количество предупреждений
 
     # Кэшировать пароль
     def set_password(self, password):
