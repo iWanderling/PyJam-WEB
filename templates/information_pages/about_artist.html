@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %} Об исполнителе {% endblock %}
+{% block title %} Распознать песню {% endblock %}
 
 {% block content %}
     {% if artist %}
@@ -25,7 +25,7 @@
 
                 <div style="font-weight: 500">
                     <a href="/track/{{ track.id }}">{{ track.track }}</a> <br>
-                    <a href="/artist/shazam_id/{{ track.artist_id }}">{{ track.band }}</a>
+                    <a href="/artist/{{ track.artist_id }}">{{ track.band }}</a>
                 </div>
         </div>
         {% endfor %}
@@ -37,15 +37,12 @@
 
             <div style="font-weight: 500">
                 <a href="/track/{{ track.id }}">{{ track.track }}</a> <br>
-                <a href="/artist/shazam_id/{{ track.artist_id }}">{{ track.band }}</a>
+                <a href="/artist/{{ track.artist_id }}">{{ track.band }}</a>
             </div>
         </div>
         {% endfor %}
     {% else %}
-            <div class="no-track-info" style="margin-top: 150px">
-                <p>К сожалению, у нас нет информации о данном исполнителе...</p>
-            </div>
-
+            К сожалению, у нас нет информации о данном исполнителе...
     {% endif %}
 
     <script>
