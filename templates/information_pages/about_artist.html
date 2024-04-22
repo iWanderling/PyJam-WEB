@@ -2,52 +2,126 @@
 {% block title %} Распознать песню {% endblock %}
 
 {% block content %}
-    {% if artist %}
-        <div class="recognize-window">
-            <figure style="margin: 40px 0px;">
-                <img width="250px" height="250px" style="border-radius: 25px" src= {{ artist.background }}>
-                <figcaption> <b>{{ artist.artist }}</b> <br> Жанр: {{ artist.genre }} <br>
-                    Количество треков на платформе: {{ platform_tracks }}
-                </figcaption>
-            </figure>
-            <div class="copy-link">
-                <button class="btn btn-success" onclick="copyToClipboard('{{ link }}')">Поделиться</button>
-            </div>
-        </div>
-
-        <h2> Лучшие песни исполнителя </h2>
-        {% for track in best_tracks %}
-        <div class="charts-content-block">
-            <img width="125px"
-                 height="125px"
-                 class="charts-song-cover"
-                 src="{{ track.background }}">
-
-                <div style="font-weight: 500">
-                    <a href="/track/{{ track.id }}">{{ track.track }}</a> <br>
-                    <a href="/artist/{{ track.artist_id }}">{{ track.band }}</a>
+{% if artist %}
+<div style="margin-top: 75px;">
+    <div class="recognize-window"
+         style="margin-bottom: 10px; padding: 20px; border-radius: 10px; width: 100%;">
+        <figure style="margin: 20px 0px; display: flex;">
+            <img id="artist-img" width="200px" height="200px" style="border-radius: 50%; overflow: hidden; margin-right: 20px;"
+                 src="{{ artist.background }}">
+            <figcaption style="margin-left: 20px; align-self: center;">
+                <div>
+                    <b class="artist-name" style="font-size: 24px; color: white;">{{ artist.artist }}</b> <br>
+                    <a href="/artist/{{ artist.id }}" class="artist-link" style="font-size: 16px; color: white;">{{ artist.band }}</a>
+                    <button class="share-button" onclick="toggleImage('{{ link }}')">
+                        <img id="share-icon"
+                             src="https://cdn-icons-png.freepik.com/256/2958/2958783.png?ga=GA1.1.1487335546.1713716169&semt=ais_hybrid"
+                             class="share-icon" width="30" height="30" style="border: none;">
+                    </button>
                 </div>
+            </figcaption>
+        </figure>
+        <div class="copy-link" style="margin-top: 20px;">
         </div>
-        {% endfor %}
+    </div>
+</div>
 
-        <h2> Все песни на исполнителя на платформе</h2>
-        {% for track in all_tracks %}
-        <div class="charts-content-block">
-            <img width="125px" height="125px" class="charts-song-cover" src={{ track.background }}>
-
-            <div style="font-weight: 500">
-                <a href="/track/{{ track.id }}">{{ track.track }}</a> <br>
-                <a href="/artist/{{ track.artist_id }}">{{ track.band }}</a>
+<h2 class="animated-text" style="font-family: 'Arial'; font-size: 25px; font-weight: bold; margin-top: 20px;">
+    Лучшие песни
+    исполнителя </h2>
+<div class="row">
+    {% for track in best_tracks %}
+    <div class="col-md-3">
+        <div class="charts-content-block" style="overflow: hidden;">
+            <a href="/track/{{ track.id }}">
+                <img width="200px" height="200px" class="charts-song-cover" src="{{ track.background }}">
+            </a>
+            <div style="font-weight: 500; margin-top: 10px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <a href="/track/{{ track.id }}" style="font-size: 18px">{{ track.track }}</a><br>
+                <a href="/artist/{{ track.artist_id }}" style="font-size: 14px; color: black;">{{ track.band }}</a>
             </div>
         </div>
-        {% endfor %}
-    {% else %}
-            К сожалению, у нас нет информации о данном исполнителе...
-    {% endif %}
+    </div>
+    {% endfor %}
+</div>
 
-    <script>
-        function copyToClipboard(link) {
-            navigator.clipboard.writeText(link)
-        }
-    </script>
+<h2 class="animated-text" style="font-family: 'Arial'; font-size: 25px; font-weight: bold;"> Все песни исполнителя
+    на
+    платформе </h2>
+<div class="row">
+    {% for track in all_tracks %}
+    <div class="col-md-3">
+        <div class="charts-content-block" style="overflow: hidden;">
+            <a href="/track/{{ track.id }}">
+                <img width="200px" height="200px" class="charts-song-cover" src="{{ track.background }}">
+            </a>
+            <div style="font-weight: 500; margin-top: 10px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <a href="/track/{{ track.id }}" style="font-size: 18px">{{ track.track }} </a><br>
+                <a href="/artist/{{ track.artist_id }}" style="font-size: 14px; color: black;">{{ track.band }}</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+К сожалению, у нас нет информации о данном исполнителе...
+{% endif %}
+
+<script>
+    // Функция для определения среднего цвета изображения
+    function getAverageColor(imageUrl, callback) {
+        var img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = function() {
+            var canvas = document.createElement('canvas');
+            canvas.width = this.width;
+            canvas.height = this.height;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(this, 0, 0);
+            var pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            var totalRed = 0, totalGreen = 0, totalBlue = 0;
+            for (var i = 0; i < pixelData.length; i += 4) {
+                totalRed += pixelData[i];
+                totalGreen += pixelData[i + 1];
+                totalBlue += pixelData[i + 2];
+            }
+            var averageRed = Math.round(totalRed / (pixelData.length / 4));
+            var averageGreen = Math.round(totalGreen / (pixelData.length / 4));
+            var averageBlue = Math.round(totalBlue / (pixelData.length / 4));
+            var averageColor = 'rgb(' + averageRed + ',' + averageGreen + ',' + averageBlue + ')';
+            callback(averageColor);
+        };
+        img.src = imageUrl;
+    }
+
+    // Функция для определения противоположного цвета
+    function getContrastColor(color) {
+        var rgb = color.substring(4, color.length - 1).replace(/ /g, '').split(',');
+        var brightness = Math.round(((parseInt(rgb[0]) * 299) +
+            (parseInt(rgb[1]) * 587) +
+            (parseInt(rgb[2]) * 114)) / 1000);
+        return (brightness > 125) ? 'black' : 'white';
+    }
+
+    // Устанавливаем средний цвет фона для recognize-window и контрастный цвет текста
+    var artistImg = document.getElementById('artist-img');
+    getAverageColor(artistImg.src, function(averageColor) {
+        var recognizeWindow = document.querySelector('.recognize-window');
+        recognizeWindow.style.backgroundColor = averageColor;
+        var artistName = document.querySelector('.artist-name');
+        artistName.style.color = getContrastColor(averageColor);
+        var artistLink = document.querySelector('.artist-link');
+        artistLink.style.color = getContrastColor(averageColor);
+    });
+
+</script>
+
+<style>
+    .share-button {
+        border: 0px solid #333;
+        border-radius: 20px;
+        padding: 5px;
+        background-color: transparent;
+    }
+</style>
 {% endblock %}
