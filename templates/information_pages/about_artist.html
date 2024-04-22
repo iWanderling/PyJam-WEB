@@ -5,13 +5,13 @@
 {% if artist %}
 <div style="margin-top: 75px;">
     <div class="recognize-window"
-         style="margin-bottom: 10px; padding: 20px; border-radius: 10px; width: 100%;">
+         style="margin-bottom: 10px; padding: 20px; border-radius: 10px; width: 96%;">
         <figure style="margin: 20px 0px; display: flex;">
             <img id="artist-img" width="200px" height="200px" style="border-radius: 50%; overflow: hidden; margin-right: 20px;"
                  src="{{ artist.background }}">
             <figcaption style="margin-left: 20px; align-self: center;">
                 <div>
-                    <b class="artist-name" style="font-size: 24px; color: white;">{{ artist.artist }}</b> <br>
+                    <b class="artist-name" style="font-size: 28px; color: white;">{{ artist.artist }}</b> <br>
                     <a href="/artist/{{ artist.id }}" class="artist-link" style="font-size: 16px; color: white;">{{ artist.band }}</a>
                     <button class="share-button" onclick="toggleImage('{{ link }}')">
                         <img id="share-icon"
