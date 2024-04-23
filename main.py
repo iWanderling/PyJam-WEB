@@ -193,7 +193,7 @@ def main():
                            track_on_platform, artist_on_platform])
 
     # Отображаем информацию:
-    return render_template('nav_pages/recognize_song.html',
+    return render_template('nav_pages/main.html',
                            all_users=all_users, active_users=active_users,
                            show_statistics=show_statistics, recognized_total=recognized_total,
                            library_tracks=in_library_tracks, feature_tracks=in_feature_tracks,
@@ -325,7 +325,7 @@ def recognize():
     # Если пользователь ничего не отправил - возвращаем обычную страницу:
     if request.method == "GET":
         background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
-        return render_template('/nav_pages/recognize.html', background=background)
+        return render_template('/nav_pages/recognize_song.html', background=background)
 
     # Если пользователь отправил файл на распознание, то возвращаем пользователю информацию о распознанном треке:
     elif request.method == "POST":
@@ -334,7 +334,7 @@ def recognize():
         # Загружаем отправленный пользователем файл, если пользователь ничего не отправил - перезагружаем страницу:
         f = request.files['file']
         if not f.filename:
-            return render_template('/nav_pages/recognize.html', message='Вы не отправили файл', background=background)
+            return render_template('/nav_pages/recognize_song.html', message='Вы не отправили файл', background=background)
 
         # Создаём уникальный путь для аудиофайла, которое мы будем загружать,
         # а затем сохраняем файл по указанному пути. После система его распознаёт и автоматически удаляет файл:
