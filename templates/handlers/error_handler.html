@@ -2,7 +2,11 @@
 {% block title %} Ошибка {% endblock %}
 
 {% block content %}
-    <h2 class="animated-text" style="margin-top: 100px">{{ error_status }}</h2>
+    <div class="container_track" style="margin-top: 150px;">
+        <div class="no-track-info">
+                <p>{{ error_status }}</p>
+        </div>
+    </div>
 
     <style>
         @keyframes slideIn {
