@@ -1,3 +1,4 @@
+""" SHAZAM API -> Shazamio. Получение информации об исполнителе по его ID"""
 from shazamio.schemas.artists import ArtistQuery
 from shazamio.schemas.enums import ArtistView
 from shazamio import Shazam
@@ -12,6 +13,7 @@ def artwork_handler(artwork):
     height = artwork['height']
     url = artwork['url']
 
+    # Преобразуем ссылку на изображение и возвращаем её:
     valid_url = url.replace('{w}', str(width)).replace('{h}', str(height))
     return valid_url
 
@@ -28,10 +30,10 @@ async def best_artist_tracks(artist_id):
 async def artist_info(artist_id):
     """ Функция возвращает краткую информацию об исполнителе
         artist_id[int] -> ID исполнителя, по которому будем искать его с помощью Shazamio """
-
     shazam = Shazam()
     about_artist = await shazam.artist_about(artist_id)
 
+    # Если исполнителя удалось найти - загружаем информацию о нём:
     if about_artist:
         about_artist = about_artist['data'][0]['attributes']
         artist_name = about_artist['name']  # Название исполнителя
@@ -68,8 +70,9 @@ async def artist_info(artist_id):
                 artist_best_tracks)
     return None
 
+
+# Обработчик функции Artist_info():
 def get_artist_info(artist_id):
-    """ Обработчик функции get_artist """
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
 

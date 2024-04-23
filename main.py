@@ -10,7 +10,7 @@ import asyncio  # Asyncio - для асинхронной загрузки из�
 # Обработчики ShazamAPI
 from data.audio_handlers.similiar_songs_handler import get_similiar_songs
 from data.audio_handlers.about_artist_handler import get_artist_info
-from data.audio_handlers.recognize_handler import recognize_song
+from data.audio_handlers.recognize_handler import recognize_song_handler
 from data.audio_handlers.charts_handler import charts_handler
 
 # Форма регистрации и авторизации
@@ -193,7 +193,7 @@ def main():
                            track_on_platform, artist_on_platform])
 
     # Отображаем информацию:
-    return render_template('nav_pages/main.html',
+    return render_template('nav_pages/recognize_song.html',
                            all_users=all_users, active_users=active_users,
                            show_statistics=show_statistics, recognized_total=recognized_total,
                            library_tracks=in_library_tracks, feature_tracks=in_feature_tracks,
@@ -342,7 +342,7 @@ def recognize():
         f.save(file_path)
 
         # Распознавание песни и удаление файла:
-        track_data = recognize_song(file_path)
+        track_data = recognize_song_handler(file_path)
         os.remove(file_path)
 
         # Если программа не смогла определить трек, то уведомляем пользователя об этом:
