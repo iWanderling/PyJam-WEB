@@ -34,19 +34,45 @@
             border-radius: 10px;
         }
 
+        .login-form .btn-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px; /* Добавленный отступ */
+        }
+
+        .login-form .btn-primary,
+        .login-form .btn-danger {
+            flex: 1;
+            margin: 0 5px;
+            border-radius: 10px;
+        }
+
         .login-form .btn-primary {
-            width: 100%;
+            margin-right: 10px;
+        }
+
+        .login-form .btn-primary,
+        .login-form .btn-danger {
             padding: 10px;
             font-size: 16px;
             color: #fff;
-            background-color: #007bff;
-            border: none;
-            border-radius: 10px;
             cursor: pointer;
         }
 
-        .login-form .btn-primary:hover {
+        .login-form .btn-primary:hover,
+        .login-form .btn-danger:hover {
             opacity: 0.9;
+        }
+
+        .login-form .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+
+        .login-form .btn-danger {
+            background-color: #dc3545;
+            border: none;
         }
 
         .login-form .alert-danger {
@@ -59,55 +85,56 @@
         }
 
         .error-field {
-        border: 2px solid red !important;
-        box-shadow: 0px 0px 5px 2px rgba(255, 0, 0, 0.5) !important;
+            border: 2px solid red !important;
+            box-shadow: 0px 0px 5px 2px rgba(255, 0, 0, 0.5) !important;
         }
     </style>
 
-<div style="margin-top: 100px;">
-    {% if current_user.is_authenticated %}
-        <form action="" method="post" class="login-form {% if form.email.errors or form.surname.errors or form.name.errors %}error-field{% endif %}">
-            <h1>Редактирование информации</h1>
-            {{ form.hidden_tag() }}
-            <div class="form-group">
-                {{ form.email.label }}<br>
-                {{ form.email(class="form-control", type="email") }}<br>
-                {% for error in form.email.errors %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ error }}
-                    </div>
-                {% endfor %}
-            </div>
-            <div class="form-group form-group-lg">
-                {{ form.gender.label }}
-                {{ form.gender(class="form-control") }}
-            </div>
-            <br>
-            <div class="form-group">
-                {{ form.surname.label }}<br>
-                {{ form.surname(class="form-control") }}<br>
-                {% for error in form.surname.errors %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ error }}
-                    </div>
-                {% endfor %}
-            </div>
-            <div class="form-group">
-                {{ form.name.label }}<br>
-                {{ form.name(class="form-control") }}<br>
-                {% for error in form.name.errors %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ error }}
-                    </div>
-                {% endfor %}
-            </div>
-            <div class="form-group btn-group">
-                {{ form.submit(type="submit", class="btn btn-primary") }}
-                <a class="btn btn-danger" href="/cabinet"> Назад </a>
-            </div>
-            {{message}}
-        </form>
-    {% else %}
-        <h2> Авторизуйтесь, чтобы получить доступ к своему личному кабинету и редактированию данных! </h2>
-    {% endif %}
+    <div style="margin-top: 100px;">
+        {% if current_user.is_authenticated %}
+            <form action="" method="post" class="login-form {% if form.email.errors or form.surname.errors or form.name.errors %}error-field{% endif %}">
+                <h1>Редактирование информации</h1>
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    {{ form.email.label }}<br>
+                    {{ form.email(class="form-control", type="email") }}<br>
+                    {% for error in form.email.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="form-group form-group-lg">
+                    {{ form.gender.label }}
+                    {{ form.gender(class="form-control") }}
+                </div>
+                <br>
+                <div class="form-group">
+                    {{ form.surname.label }}<br>
+                    {{ form.surname(class="form-control") }}<br>
+                    {% for error in form.surname.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    {{ form.name.label }}<br>
+                    {{ form.name(class="form-control") }}<br>
+                    {% for error in form.name.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="form-group btn-group">
+                    {{ form.submit(type="submit", class="btn btn-primary") }}
+                    <a class="btn btn-danger" href="/cabinet"> Назад </a>
+                </div>
+                {{message}}
+            </form>
+        {% else %}
+            <h2> Авторизуйтесь, чтобы получить доступ к своему личному кабинету и редактированию данных! </h2>
+        {% endif %}
+    </div>
 {% endblock %}
