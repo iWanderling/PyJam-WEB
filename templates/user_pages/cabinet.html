@@ -53,7 +53,9 @@
                         Загрузка картинки профиля
                     </div>
                     <div class="card-body">
-                        <img class="img-fluid mb-3" src="{{ current_user.background }}" alt="Profile Image">
+                        <div style="width: 200px; height: 200px; overflow: hidden; margin: 0 auto;">
+                            <img class="img-fluid mb-3" src="{{ current_user.background }}" alt="Profile Image">
+                        </div>
                         <form method="post" enctype="multipart/form-data">
                             <div class="form-group">
                                 <input type="file" accept=".jpg,.png" class="form-control-file" id="profile_img" name="file">
