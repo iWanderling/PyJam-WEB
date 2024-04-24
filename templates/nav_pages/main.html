@@ -222,7 +222,9 @@
             var stepTime = Math.abs(Math.floor(duration / range));
             var obj = document.getElementById(id);
             var timer = setInterval(function() {
-                current += increment;
+                if (current != end) { // Проверка, чтобы не устанавливать отрицательные значения, если конечное значение равно 0
+                    current += increment;
+                }
                 obj.innerText = current;
                 if (current == end) {
                     clearInterval(timer);
