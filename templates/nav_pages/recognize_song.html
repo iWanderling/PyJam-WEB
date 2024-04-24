@@ -2,26 +2,36 @@
 {% block title %} Распознать песню {% endblock %}
 
 {% block content %}
-    {% if message %}
-        {{ message }}
-    {% endif %}
-
-    <div class="recognize-window">
-        <figure style="margin: 40px 0px;">
-            <img width="250px" height="250px" style="border-radius: 25px" src="{{ background }}">
-            <figcaption> Загрузите файл и нажмите на волшебную кнопку, чтобы произошла настоящая магия! </figcaption>
-        </figure>
-
-        <form method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="rec">Приложите звуковой файл</label>
-                <input type="file" accept=".mp3,.m4a" class="form-control-file" id="rec" name="file">
-            </div>
-            <button type="submit" class="btn btn-primary">Распознать</button>
-        </form>
+<div class="container text-center" style="height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+    <div class="recognize-button mb-3" style="position: relative;">
+        <label for="rec" style="cursor: pointer;">
+            <img src="{{ url_for('static', filename='img/system/shazam.png') }}" alt="Shazam Logo" style="border-radius: 50%; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); width: 250px; height: 250px; animation: pulse 1s infinite; background-color: rgba(255, 255, 255, 0.5);">
+            <form id="recognition-form" method="post" enctype="multipart/form-data" action="/recognize"
+                  style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                <div class="form-group" style="display: none;">
+                    <input type="file" accept=".mp3,.m4a" class="form-control-file" id="rec" name="file"
+                           onchange="document.getElementById('recognition-form').submit();">
+                </div>
+            </form>
+        </label>
     </div>
-
     {% if message %}
-        {{ message }}
+        <div class="alert alert-info" role="alert">
+            {{ message }}
+        </div>
     {% endif %}
+</div>
+<style>
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+</style>
 {% endblock %}
