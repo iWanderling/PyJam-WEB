@@ -869,7 +869,7 @@ def cabinet():
             # Иначе - загружаем файл на сервер и обновляем изображения профиля пользователя:
             file_path = 'static/img/user_profile/' + identifier(format_='.png')
             f.save(file_path)
-            user.background = file_path
+            user.background = f'/{file_path}'
             db_sess.commit()
             return redirect('/cabinet')
 
