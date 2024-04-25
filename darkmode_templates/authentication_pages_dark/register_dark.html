@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %} Регистрация {% endblock %}
+{% block content %}
+<style>
+    body {
+        background-color: #222;
+        color: #fff;
+    }
+
+    .login-form {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #333;
+        border: 1px solid #555;
+        border-radius: 10px;
+    }
+
+    .login-form h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .login-form .form-group {
+        margin-bottom: 20px;
+    }
+
+    .login-form label {
+        font-weight: bold;
+    }
+
+    .login-form .form-control {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #555;
+        border-radius: 10px;
+        background-color: #444;
+        color: #fff;
+    }
+
+    .login-form .btn-primary {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        color: #fff;
+        background-color: #007bff;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    .login-form .btn-primary:hover {
+        opacity: 0.9;
+    }
+
+    .login-form .alert-danger {
+        margin-top: 5px;
+        padding: 10px;
+        font-size: 14px;
+        border-radius: 4px;
+        background-color: #dc3545;
+        border: 1px solid #d73b51;
+    }
+
+    .error-field {
+        border: 2px solid red !important;
+        box-shadow: 0px 0px 5px 2px rgba(255, 0, 0, 0.5) !important;
+    }
+</style>
+
+<div style="margin-top: 100px;">
+<form action="" method="post" class="login-form {% if form.email.errors or form.password.errors or form.password_again.errors or form.surname.errors or form.name.errors %}error-field{% endif %}">
+    <h1>Регистрация</h1>
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.email.label }}<br>
+        {{ form.email(class="form-control", type="email") }}<br>
+        {% for error in form.email.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+    </div>
+    <div class="form-group">
+        {{ form.password.label }}<br>
+        {{ form.password(class="form-control", type="password") }}<br>
+        {% for error in form.password.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+    </div>
+    <div class="form-group">
+        {{ form.password_again.label }}<br>
+        {{ form.password_again(class="form-control", type="password") }}<br>
+        {% for error in form.password_again.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+    </div>
+    <div class="form-group form-group-lg">
+        {{ form.gender.label }}
+        {{ form.gender(class="form-control") }}
+    </div>
+    <br>
+    <div class="form-group">
+        {{ form.surname.label }}<br>
+        {{ form.surname(class="form-control") }}<br>
+        {% for error in form.surname.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+    </div>
+    <div class="form-group">
+        {{ form.name.label }}<br>
+        {{ form.name(class="form-control") }}<br>
+        {% for error in form.name.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+    </div>
+    <div class="form-group">
+        {{ form.submit(type="submit", class="btn btn-primary") }}
+    </div>
+    {{message}}
+</form>
+{% endblock %}

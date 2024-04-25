@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %} Информация о треке {% endblock %}
+
+{% block content %}
+<div class="container_track" style="margin-top: 150px; background-color: #333;">
+    {% if track %}
+    <div class="track-info" style="margin-top: 0px;">
+        <div class="track-image">
+            <img src="{{ track.background }}" alt="{{ track.track }}" class="img-fluid rounded-cover">
+        </div>
+        <div class="track-details" style="background-color: #333">
+            <div style="margin-top: 100px;">
+                <h2 class="track-title" style="margin-bottom: 10px; color: #fff;">{{ track.track }}</h2>
+                <p class="track-artist" style="color: #ddd;">{{ track.band }}</p>
+                <div class="copy-link" style="margin-top: 10px;">
+                    <button class="share-button" onclick="toggleImage('{{ link }}')">
+                        <img id="share-icon" src="https://cdn-icons-png.freepik.com/256/2958/2958783.png?ga=GA1.1.1487335546.1713716169&semt=ais_hybrid"
+                             class="share-icon" width="50" height="50" style="border: none;">
+                    </button>
+                </div>
+
+                <div class="track-actions" style="margin-top: 10px;">
+                    <a href="/artist/track/{{ track.id }}" class="btn btn-primary">Об исполнителе</a>
+                    <a href="/similiar/track/{{ track.id }}" class="btn btn-danger">Похожие треки</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="no-track-info">
+        <p style="color: #ddd;">К сожалению, у нас нет информации о данном треке...</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function copyToClipboard(link) {
+        navigator.clipboard.writeText(link)
+    }
+
+    function toggleImage(link) {
+        var img = document.getElementById('share-icon');
+        if (img.src === 'https://cdn-icons-png.freepik.com/256/2958/2958791.png?ga=GA1.1.1487335546.1713716169&semt=ais_hybrid') {
+            img.src = 'https://cdn-icons-png.freepik.com/256/2958/2958783.png?ga=GA1.1.1487335546.1713716169&semt=ais_hybrid';
+        } else {
+            img.src = 'https://cdn-icons-png.freepik.com/256/2958/2958791.png?ga=GA1.1.1487335546.1713716169&semt=ais_hybrid';
+        }
+        copyToClipboard(link);
+    }
+</script>
+
+<style>
+    body {
+        background-color: #111;
+        color: #ddd;
+    }
+
+    .share-button {
+        border: 0px solid #333;
+        border-radius: 20px;
+        padding: 5px;
+        background-color: transparent;
+    }
+
+</style>
+{% endblock %}

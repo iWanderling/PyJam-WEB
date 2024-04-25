@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %} Похожие песни {% endblock %}
+{% block content %}
+{% if similiar_tracks %}
+
+<div class="recognize-window" style="background-color: #222; padding: 20px; border-radius: 10px;">
+    <figure style="margin: 40px 0px; display: flex;">
+        <img width="250px" height="250px" style="border-radius: 25px;" src={{ track_owner.background }}>
+        <figcaption style="margin-left: 20px; align-self: flex-start; color: #ddd;">
+            <b><a href="/track/{{ track_owner.id }}" style="font-size: 30px; color: #007bff;">{{ track_owner.track
+                }}</a></b> <br>
+            <a href="/artist/shazam_id/{{ track_owner.artist_id }}" style="font-size: 18px; color: #ddd;">{{ track_owner.band
+                }}</a>
+        </figcaption>
+    </figure>
+</div>
+<div style="background-color: #111; padding: 20px; border-radius: 10px;">
+    <h2 class="animated-text" style="font-family: 'Open Sans', font-size: 50px; color: #ddd;"> Похожие треки </h2>
+    <div class="row">
+        {% for track in similiar_tracks %}
+        <div class="col-md-3">
+            <div class="charts-content-block" style="overflow: hidden; background-color: #333; padding: 20px; border-radius: 10px;">
+                <a href="/track/{{ track.id }}">
+                    <img width="200px"
+                         height="200px"
+                         class="charts-song-cover"
+                         src={{ track.background }}>
+                </a>
+                <div style="font-weight: 500; margin-top: 15px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <a href="/track/{{ track.id }}" style="color: #fff;">{{ track.track }}</a><br>
+                    <a href="/artist/shazam_id/{{ track.artist_id }}" style="color: #ddd;">{{ track.band }}</a>
+                </div>
+            </div>
+        </div>
+
+        {% if loop.index % 4 == 0 %}
+    </div>
+    <div class="row">
+        {% endif %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="animated-text" style="margin-top: 100px; color: #ddd;">К сожалению, мы не можем предоставить вам информацию об этом...</p>
+    {% endif %}
+
+    <style>
+        @keyframes slideIn {
+            0% { transform: translateY(-50px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .animated-text {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        body {
+            background-color: #111;
+            color: #ddd;
+        }
+
+    </style>
+    {% endblock %}
+</div>

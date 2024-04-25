@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %} Чарты {% endblock %}
+
+{% block content %}
+<style>
+    .charts-song-cover {
+        max-width: 100%;
+        height: auto;
+        transition: transform 0.3s ease;
+    }
+
+    .charts-song-info {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 18px;
+    }
+
+    .charts-song-link {
+        text-decoration: none;
+    }
+
+    .charts-song-link:hover .charts-song-cover {
+        transform: scale(1.03);
+    }
+
+    .charts-content-block {
+        margin-top: 20px; /* Увеличиваем отступ между треками */
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        font-size: 2rem;
+        line-height: 1.5;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        cursor: pointer;
+        border: none;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+        color: #fff;
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn:hover {
+        opacity: 0.8;
+        background-color: #000;
+    }
+
+    .charts-song-info .track-title {
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    .charts-song-info .artist-name {
+        color: black;
+        font-size: 18px;
+        font-weight: normal; /* Убираем жирность */
+    }
+
+    /* Обновляем стили для жирного синего названия трека */
+    .charts-song-info .track-title {
+        color: #007bff;
+        font-weight: bold;
+    }
+</style>
+
+
+<div style="margin-top: 75px; display: flex; flex-direction: column; align-items: center;">
+    <h1 class="top-100-heading"> Мировые хиты </h1>
+
+    <div style="display: flex;">
+        <a href="/charts/world" class="btn btn-danger rounded"> Мировой топ </a>
+        <div class="dropdown" style="margin-left: 5px;">
+            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                {{ country }}
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="/charts/AU">Австралия</a>
+                <a class="dropdown-item" href="/charts/AT">Австрия</a>
+                <a class="dropdown-item" href="/charts/BY">Беларусь</a>
+                <a class="dropdown-item" href="/charts/UK">Великобритания</a>
+                <a class="dropdown-item" href="/charts/DE">Германия</a>
+                <a class="dropdown-item" href="/charts/DK">Дания</a>
+                <a class="dropdown-item" href="/charts/ES">Испания</a>
+                <a class="dropdown-item" href="/charts/IT">Италия</a>
+                <a class="dropdown-item" href="/charts/CN">Китай</a>
+                <a class="dropdown-item" href="/charts/PT">Португалия</a>
+                <a class="dropdown-item" href="/charts/RU">Россия</a>
+                <a class="dropdown-item" href="/charts/US">США</a>
+                <a class="dropdown-item" href="/charts/RS">Сербия</a>
+                <a class="dropdown-item" href="/charts/FI">Финляндия</a>
+                <a class="dropdown-item" href="/charts/FR">Франция</a>
+                <a class="dropdown-item" href="/charts/CH">Швейцария</a>
+            </div>
+        </div>
+        <div class="dropdown" style="margin-left: 5px;">
+            <button class="btn btn-danger dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                {{ genre_type }}
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            {% for genre in available_genres %}
+                <a class="dropdown-item" href="/charts/{{country_code}}/{{ genre }}">{{ genres_list[genre] }}</a>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+{% if top %}
+    <div class="row">
+        {% for i in top[:3] %}
+        <div class="col-md-4">
+            <div class="charts-content-block big-song" style="position: relative;">
+                <div class="badge badge-primary badge-pill d-flex justify-content-center align-items-center"
+                     style="position: absolute; top: 10px; right: 0px; top: 0; font-size: 60px; background-color: transparent; width: 40px; height: 60px; line-height: 40px; text-align: center; border-radius: 50%;">
+                    {% if loop.index == 1 %}
+                    🥇
+                    {% elif loop.index == 2 %}
+                    🥈
+                    {% else %}
+                    🥉
+                    {% endif %}
+                </div>
+                <span style="font-size: 24px;"></span>
+                <a href="/charts/track/{{ i.id }}" class="charts-song-link">
+                    <img class="charts-song-cover"
+                         src="{{ i.background }}"
+                         alt="Обложка трека">
+                </a>
+
+                <div class="charts-song-info">
+                    <a href="/charts/track/{{ i.id }}" class="charts-song-link track-title">{{ i.track }}</a><br>
+                    <a href="/artist/shazam_id/{{ i.artist_id }}" class="artist-name">{{ i.band }}</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="row">
+        {% for i in top[3:] %}
+        {% if loop.index % 4 == 1 %}
+    </div>
+    <div class="row">
+        {% endif %}
+        <div class="col-md-3" style="margin-bottom: 0px;">
+            <div class="charts-content-block">
+                <a href="/charts/track/{{ i.id }}" class="charts-song-link">
+                    <img class="charts-song-cover"
+                         src="{{ i.background }}"
+                         alt="Обложка трека">
+                </a>
+
+                <div class="charts-song-info">
+                    <a href="/charts/track/{{ i.id }}" class="charts-song-link " style="font-size: 20px; font-weight: bold;">{{loop.index + 3}}. {{ i.track }}</a><br>
+                    <a href="/artist/shazam_id/{{ i.artist_id }}" style="font-size: 15px; color: black;">{{ i.band }}</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    </div>
+{% else %}
+    <h1 class="top-100-heading"> Сервер не может получить данные. <br>Попробуйте позднее! </h1>
+
+{% endif %}
+{% endblock %}

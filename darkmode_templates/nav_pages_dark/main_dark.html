@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %} Главная {% endblock %}
+
+{% block content %}
+<style>
+    /* КАРТОЧКИ */
+    .card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background-color: #333;
+        color: #ddd;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .top-100-heading {
+        font-size: 3rem;
+        margin-bottom: 2rem;
+        color: #333;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-img-top {
+        border-radius: 1rem 1rem 0 0;
+    }
+
+    .badge-primary {
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* СТАТИСТИКА */
+    .statistic-container {
+        margin-top: 3rem;
+        padding: 2rem;
+        background-color: #111;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .statistic-item {
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    .statistic-label {
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        color: #ddd;
+    }
+
+    .statistic-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #007bff;
+        animation: appear 1s ease-out;
+    }
+
+    .statistic-item {
+        background-color: #222;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 1.5rem;
+    }
+
+    .statistic-content {
+        padding: 0.5rem 1rem;
+    }
+
+    .statistic-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    @keyframes appear {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card-title a {
+        font-size: 2rem;
+        color: #ddd;
+    }
+
+    .card-text a {
+        font-size: 1.5rem;
+        color: #ddd;
+    }
+
+    body {
+        background-color: #111;
+    }
+</style>
+
+<div style="margin-top: 50px;">
+    <div class="container-fluid py-5">
+        <div class="text-center">
+            <p class="lead" style="font-size: 2rem; color: #ddd;">Мы рады приветствовать вас на нашей платформе. Здесь вы можете
+                насладиться музыкой и многочисленными возможностями.</p>
+            <img src="{{ url_for('static', filename='img/system/shazam.png') }}" width="100" height="100"
+                 class="d-inline-block align-top" alt="PyJam Logo">
+        </div>
+        <div class="statistic-container text-center">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="statistic-item">
+                        <div class="statistic-content">
+                            <span class="statistic-label">Зарегистрированных пользователей:</span>
+                            <span class="statistic-value" id="registered-users">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="statistic-item">
+                        <div class="statistic-content">
+                            <span class="statistic-label">Распознанных треков:</span>
+                            <span class="statistic-value" id="recognized-tracks">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="statistic-item">
+                        <div class="statistic-content">
+                            <span class="statistic-label">Треков на платформе:</span>
+                            <span class="statistic-value" id="tracks-platform">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="statistic-item">
+                        <div class="statistic-content">
+                            <span class="statistic-label">Исполнителей на платформе:</span>
+                            <span class="statistic-value" id="artists-platform">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="margin-top: 50px;">
+
+            {% if most_popular_tracks %}
+            <div class="text-center mb-5">
+                <h2 class="mb-4" style="color: #ddd;">Популярные песни на платформе</h2>
+                <div class="row">
+                    {% for track in most_popular_tracks %}
+                    <div class="col-md-4">
+                        <a href="/charts/track/{{ track.id }}" class="card-link">
+                            <div class="card mb-4">
+                                <img src="{{ track.background }}" class="card-img-top" alt="{{ track.track }}">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ track.track }}</h5>
+                                    <p class="card-text">🎤 <a href="/artist/shazam_id/{{ track.artist_id }}">{{
+                                        track.band }}</a></p>
+                                    <p class="card-text">Распознано раз: {{ track.popularity }}</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if most_popular_artists %}
+            <div class="text-center mb-5">
+                <h2 class="mb-4" style="color: #ddd;">Популярные артисты</h2>
+                <div class="row">
+                    {% for artist_data in most_popular_artists %}
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <a href="/artist/shazam_id/{{ artist_data[0].shazam_id }}" class="card-link">
+                            <img src="{{ artist_data[0].background }}" class="card-img-top"
+                                 alt="{{ artist_data[0].artist }}">
+                            <div class="card-body">
+                                <h5 class="card-title"><a href="/artist/shazam_id/{{ artist_data[0].shazam_id }}">{{
+                                    artist_data[0].artist }}</a></h5>
+                                <p class="card-text" style="color: #ddd;">Распознаний: {{ artist_data[1][1] }}</p>
+                                <p class="card-text" style="color: #ddd;">Треков на сайте: {{ artist_data[1][0] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        animateValue("registered-users", 0, {{ all_users }}, 2500);
+        animateValue("recognized-tracks", 0, {{ recognized_total }}, 2500);
+        animateValue("tracks-platform", 0, {{ track_on_platform }}, 2500);
+        animateValue("artists-platform", 0, {{ artist_on_platform }}, 2500);
+    });
+
+    function animateValue(id, start, end, duration) {
+        var range = end - start;
+        var current = start;
+        var increment = end > start ? 1 : -1;
+        var stepTime = Math.abs(Math.floor(duration / range));
+        var obj = document.getElementById(id);
+        var timer = setInterval(function() {
+            if (current != end) { // Проверка, чтобы не устанавливать отрицательные значения, если конечное значение равно 0
+                current += increment;
+            }
+            obj.innerText = current;
+            if (current == end) {
+                clearInterval(timer);
+            }
+        }, stepTime);
+    }
+</script>
+
+{% endblock %}

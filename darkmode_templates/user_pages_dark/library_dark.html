@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %} Библиотека {% endblock %}
+
+{% block content %}
+<div style="margin-top: 100px;">
+    {% if current_user.is_authenticated %}
+        <div class="library-navigation-bar">
+            <a href="library" class="btn btn-danger"> Все треки </a>
+            <a href="featured" class="btn btn-warning"> Избранное </a>
+        </div>
+
+        {% for i in library %}
+            <div class="track-block" style="margin: 10px 0px; display: flex; align-items: center; padding: 10px; border-radius: 5px; position: relative;">
+                <a href="track/{{i[0].id}}" class="track-icon-link">
+                    <img width="130px" height="130px" class="charts-song-cover" src={{ i[0].background }}>
+                </a>
+                <div style="margin-left: 20px; flex-grow: 1;">
+                    <div style="font-weight: 500">
+                        <a class="library-track-href" href="track/{{i[0].id}}">
+                            {{loop.index}}. {{ i[0].track }} {% if i[1].is_favourite %}⭐{% endif %}
+                        </a>
+                    </div>
+                    <div>
+                        {{ i[0].band }}
+                    </div>
+                    <div> {{ i[1].date }}</div>
+                </div>
+                <div class="library-track-buttons">
+                    <form action="/aaa" method="post">
+                        <a href="feature/track/{{ i[1].id }}" class="btn btn-warning" style="margin-right: 10px">⭐</a>
+                    </form>
+                    <form action="delete-track" method="get">
+                        <a href="/delete/track/{{ i[1].id }}" class="btn btn-danger" methods="delete">🗑️</a>
+                    </form>
+                </div>
+                <hr class="track-divider" style="position: absolute; width: calc(100% - 40px); margin: 0 20px; bottom: 0; transition: width 0.3s ease-in-out, margin 0.3s ease-in-out;">
+            </div>
+        {% endfor %}
+    {% else %}
+        <h1> Войдите, чтобы сохранять распознанные треки </h1>
+    {% endif %}
+
+    <style>
+        .track-block:hover .track-divider {
+            width: calc(70% - 40px);
+            margin: 0 20px;
+            bottom: 0;
+            transition: width 0.3s ease-in-out, margin 0.3s ease-in-out;
+        }
+
+        .track-block:hover {
+            background-color: #f0f0f0;
+        }
+
+        .track-block:hover .track-icon-link img {
+            transform: scale(1.1);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Добавленный CSS */
+        .track-block:not(:hover) .library-track-buttons {
+            display: none;
+        }
+    </style>
+{% endblock %}

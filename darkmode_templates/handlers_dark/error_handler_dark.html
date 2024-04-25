@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %} Ошибка {% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top: 150px;">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="error-message animated-text">
+                <h2>Упс! Что-то пошло не так...</h2>
+                <p>{{ error_status }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes slideIn {
+        0% { transform: translateY(-50px); opacity: 0; }
+        100% { transform: translateY(0); opacity: 1; }
+    }
+
+    .animated-text {
+        animation: slideIn 0.5s ease-out;
+    }
+
+    .error-message {
+        padding: 20px;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .error-message h2 {
+        font-size: 24px;
+        color: #721c24;
+        margin-bottom: 10px;
+    }
+
+    .error-message p {
+        font-size: 18px;
+        color: #721c24;
+    }
+</style>
+{% endblock %}
