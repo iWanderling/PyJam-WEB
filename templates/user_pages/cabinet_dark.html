@@ -1,104 +1,84 @@
 {% extends "base.html" %}
 {% block title %} Профиль {% endblock %}
 
-{% block style %}
-<style>
-    .profile-img-container {
-        width: 200px;
-        height: 200px;
-        overflow: hidden;
-        margin: 0 auto;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .profile-img {
-        max-width: 100%;
-        max-height: 100%;
-        width: auto;
-        height: auto;
-        object-fit: contain;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div style="margin-top: 100px;" class="container">
+<style>
+        body {
+        background-color: #111;
+        color: #fff;
+        }
+</style>
+<div style="margin-top: 100px; background-color: #222; color: #fff; border-radius: 10px;" class="container">
     {% if current_user.is_authenticated %}
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <div class="text-center mb-4">
-                <h1 class="display-4 mb-3">Здравствуйте, {{ current_user.name }}!</h1>
-                <p class="lead">
-                    {% if intop_position %}
-                    {% if intop_position == 1 %}
-                    Вы лидируете в тройке лидеров и занимаете первое место в нашем рейтинге!
-                    {% elif intop_position == 2 %}
-                    Вы находитесь в тройке лидеров и занимаете второе место в нашем рейтинге!
-                    {% elif intop_position == 3 %}
-                    Вы находитесь в тройке лидеров и занимаете третье место в нашем рейтинге!
-                    {% else %}
-                    Вы находитесь в нашем рейтинге на {{ intop_position }} месте!
-                    {% endif %}
-                    {% endif %}
-                </p>
-            </div>
-            <div class="card mb-4 shadow">
-                <div class="card-body">
-                    <h2 class="card-title">Ваша статистика</h2>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">Дата регистрации: {{ date }}</li>
-                        <li class="list-group-item">🎶 Распознанных треков: {{ rec_count }}</li>
-                        <li class="list-group-item">📖 В вашей библиотеке: {{ library_count }} треков</li>
-                        <li class="list-group-item">⭐ В избранном: {{ featured_count }} треков</li>
-                    </ul>
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div style="text-align: center; margin-bottom: 40px;">
+                    <h1 style="margin-bottom: 20px; font-size: 2.5rem;">Здравствуйте, {{ current_user.name }}!</h1>
+                    <p style="font-size: 1.25rem;">
+                        {% if intop_position %}
+                            {% if intop_position == 1 %}
+                                Вы лидируете в тройке лидеров и занимаете первое место в нашем рейтинге!
+                            {% elif intop_position == 2 %}
+                                Вы находитесь в тройке лидеров и занимаете второе место в нашем рейтинге!
+                            {% elif intop_position == 3 %}
+                                Вы находитесь в тройке лидеров и занимаете третье место в нашем рейтинге!
+                            {% else %}
+                                Вы находитесь в нашем рейтинге на {{ intop_position }} месте!
+                            {% endif %}
+                        {% endif %}
+                    </p>
                 </div>
-            </div>
-            <div class="text-center mb-4">
-                <a class="btn btn-primary btn-lg mr-3 shadow-sm" href="/cabinet/edit">Редактировать данные</a>
-                <a class="btn btn-success btn-lg mr-3 shadow-sm" href="/cabinet/change-password">Сменить пароль</a>
-                <a class="btn btn-danger btn-lg mr-3 shadow-sm" href="/logout">Выйти из аккаунта</a>
-                <div style="margin-top: 10px;" class="container">
+                <div class="card mb-4 shadow" style="background-color: #555; color: #fff;">
+                    <div class="card-body">
+                        <h2 class="card-title">Ваша статистика</h2>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item" style="background-color: #555;">Дата регистрации: {{ date }}</li>
+                            <li class="list-group-item" style="background-color: #555;">🎶 Распознанных треков: {{ rec_count }}</li>
+                            <li class="list-group-item" style="background-color: #555;">📖 В вашей библиотеке: {{ library_count }} треков</li>
+                            <li class="list-group-item" style="background-color: #555;">⭐ В избранном: {{ featured_count }} треков</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="text-center mb-4">
+                    <a class="btn btn-primary btn-lg mr-3 shadow-sm" href="/cabinet/edit" style="background-color: #007bff;">Редактировать данные</a>
+                    <a class="btn btn-success btn-lg mr-3 shadow-sm" href="/cabinet/change-password" style="background-color: #28a745;">Сменить пароль</a>
+                    <a class="btn btn-danger btn-lg mr-3 shadow-sm" href="/logout" style="background-color: #dc3545;">Выйти из аккаунта</a>
+                    <div style="margin-top: 10px;" class="container">
                     {% if current_user.id == 1 %}
-                    <a class="btn btn-dark btn-lg shadow-sm" href="/administrator">Кабинет администратора</a>
+                        <a class="btn btn-dark btn-lg shadow-sm" href="/administrator" style="background-color: #343a40;">Кабинет администратора</a>
                     {% else %}
-                    <a class="btn btn-dark btn-lg shadow-sm" href="/cabinet/delete_profile">Удалить аккаунт</a>
+                        <a class="btn btn-dark btn-lg shadow-sm" href="/cabinet/delete_profile" style="background-color: #343a40;">Удалить аккаунт</a>
                     {% endif %}
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="col-md-12 mx-auto">
-                <div class="card text-center shadow">
-                    <div class="card-header">
+                <div class="card text-center shadow" style="background-color: #555;">
+                    <div class="card-header" style="background-color: #555;">
                         Загрузка картинки профиля
                     </div>
                     <div class="card-body">
-                        <div class="profile-img-container">
-                            <img class="img-fluid mb-3 profile-img" src="{{ current_user.background }}"
-                                 alt="Profile Image">
+                        <div style="width: 200px; height: 200px; overflow: hidden; margin: 0 auto;">
+                            <img class="img-fluid mb-3" src="{{ current_user.background }}" alt="Profile Image">
                         </div>
                         <form method="post" enctype="multipart/form-data">
                             <div class="form-group">
-                                <input type="file" accept=".jpg,.png" class="form-control-file" id="profile_img"
-                                       name="file">
+                                <input type="file" accept=".jpg,.png" class="form-control-file" id="profile_img" name="file">
                             </div>
-                            <button type="submit" class="btn btn-primary shadow-sm rounded-pill">Загрузить</button>
-                            <a class="btn btn-danger shadow-sm rounded-pill" href="/cabinet/set_default">Сбросить</a>
+                            <button type="submit" class="btn btn-primary shadow-sm rounded-pill" style="background-color: #007bff;">Загрузить</button>
+                            <a class="btn btn-danger shadow-sm rounded-pill" href="/cabinet/set_default" style="background-color: #dc3545;">Сбросить</a>
                         </form>
                     </div>
                 </div>
-
-
             </div>
         </div>
-        {% else %}
+    {% else %}
         <div class="row">
             <div class="col-md-8 mx-auto text-center">
                 <h2 class="display-4 mb-4">Авторизуйтесь, чтобы получить доступ к своему личному кабинету!</h2>
             </div>
         </div>
-        {% endif %}
-    </div>
-    {% endblock %}
+    {% endif %}
+</div>
+{% endblock %}

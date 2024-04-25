@@ -16,7 +16,7 @@
                 </a>
                 <div style="margin-left: 20px; flex-grow: 1;">
                     <div style="font-weight: 500">
-                        <a class="library-track-href" href="track/{{i[0].id}}">
+                        <a class="library-track-href" href="track/{{i[0].id}}" style="font-size: 20px">
                             {{loop.index}}. {{ i[0].track }} {% if i[1].is_favourite %}⭐{% endif %}
                         </a>
                     </div>
@@ -41,25 +41,40 @@
     {% endif %}
 
     <style>
-        .track-block:hover .track-divider {
-            width: calc(70% - 40px);
-            margin: 0 20px;
-            bottom: 0;
-            transition: width 0.3s ease-in-out, margin 0.3s ease-in-out;
+        body {
+        background-color: #121212;
+        color: #fff;
         }
 
-        .track-block:hover {
-            background-color: #f0f0f0;
+        .library-navigation-bar a {
+            color: #fff;
+        }
+
+        .track-block {
+            background-color: #333;
+            color: #fff;
+        }
+
+        .library-track-href {
+            color: #fff;
+        }
+
+        .library-track-buttons a {
+            color: #fff;
+        }
+
+        .track-divider {
+            background-color: #fff;
+        }
+
+        .track-divider {
+            background-color: #fff;
+            transition: width 0.3s ease-in-out, margin 0.3s ease-in-out;
         }
 
         .track-block:hover .track-icon-link img {
             transform: scale(1.1);
             transition: transform 0.3s ease-in-out;
-        }
-
-        /* Добавленный CSS */
-        .track-block:not(:hover) .library-track-buttons {
-            display: none;
         }
     </style>
 {% endblock %}

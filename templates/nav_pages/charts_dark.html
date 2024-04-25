@@ -2,73 +2,6 @@
 {% block title %} Чарты {% endblock %}
 
 {% block content %}
-<style>
-    .charts-song-cover {
-        max-width: 100%;
-        height: auto;
-        transition: transform 0.3s ease;
-    }
-
-    .charts-song-info {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        font-size: 18px;
-    }
-
-    .charts-song-link {
-        text-decoration: none;
-    }
-
-    .charts-song-link:hover .charts-song-cover {
-        transform: scale(1.03);
-    }
-
-    .charts-content-block {
-        margin-top: 20px; /* Увеличиваем отступ между треками */
-    }
-
-    .btn {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        font-size: 2rem;
-        line-height: 1.5;
-        text-align: center;
-        white-space: nowrap;
-        vertical-align: middle;
-        cursor: pointer;
-        border: none;
-        border-radius: 0.5rem;
-        transition: all 0.3s ease;
-        color: #fff;
-        background-color: #007bff;
-        border-color: #007bff;
-    }
-
-    .btn:hover {
-        opacity: 0.8;
-        background-color: #000;
-    }
-
-    .charts-song-info .track-title {
-        color: #007bff;
-        font-weight: bold;
-    }
-
-    .charts-song-info .artist-name {
-        color: black;
-        font-size: 18px;
-        font-weight: normal; /* Убираем жирность */
-    }
-
-    /* Обновляем стили для жирного синего названия трека */
-    .charts-song-info .track-title {
-        color: #007bff;
-        font-weight: bold;
-    }
-</style>
-
-
 <div style="margin-top: 75px; display: flex; flex-direction: column; align-items: center;">
     <h1 class="top-100-heading"> Мировые хиты </h1>
 
@@ -171,6 +104,6 @@
     </div>
 {% else %}
     <h1 class="top-100-heading"> Сервер не может получить данные. <br>Попробуйте позднее! </h1>
-
 {% endif %}
+</div>
 {% endblock %}

@@ -1,16 +1,20 @@
 {% extends "base.html" %}
 {% block title %} Профиль {% endblock %}
 
-
 {% block content %}
     <style>
+        body {
+        background-color: #222;
+        color: #fff;
+        }
         .login-form {
             max-width: 400px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
+            background-color: #333; /* Цвет фона формы */
+            border: 1px solid #555; /* Цвет рамки */
             border-radius: 10px;
+            color: #fff; /* Цвет текста */
         }
 
         .login-form h1 {
@@ -30,8 +34,10 @@
             width: 100%;
             padding: 10px;
             font-size: 16px;
-            border: 1px solid #ccc;
+            border: 1px solid #555; /* Цвет рамки поля ввода */
             border-radius: 10px;
+            color: #fff; /* Цвет текста в поле ввода */
+            background-color: #444; /* Цвет фона поля ввода */
         }
 
         .login-form .btn-group {
@@ -46,10 +52,6 @@
             flex: 1;
             margin: 0 5px;
             border-radius: 10px;
-        }
-
-        .login-form .btn-primary {
-            margin-right: 10px;
         }
 
         .login-form .btn-primary,

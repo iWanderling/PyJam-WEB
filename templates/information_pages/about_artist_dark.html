@@ -36,9 +36,9 @@
             <a href="/track/{{ track.id }}">
                 <img width="200px" height="200px" class="charts-song-cover" src="{{ track.background }}">
             </a>
-            <div style="font-weight: 500; margin-top: 10px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            <div style="font-weight: 500; margin-top: 10px; max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                 <a href="/track/{{ track.id }}" style="font-size: 18px">{{ track.track }}</a><br>
-                <a href="/artist/{{ track.artist_id }}" style="font-size: 14px; color: black;">{{ track.band }}</a>
+                <a href="/artist/{{ track.artist_id }}" style="font-size: 14px; color: white;">{{ track.band }}</a>
             </div>
         </div>
     </div>
@@ -55,9 +55,9 @@
             <a href="/track/{{ track.id }}">
                 <img width="200px" height="200px" class="charts-song-cover" src="{{ track.background }}">
             </a>
-            <div style="font-weight: 500; margin-top: 10px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            <div style="font-weight: 500; margin-top: 10px; max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                 <a href="/track/{{ track.id }}" style="font-size: 18px">{{ track.track }} </a><br>
-                <a href="/artist/{{ track.artist_id }}" style="font-size: 14px; color: black;">{{ track.band }}</a>
+                <a href="/artist/{{ track.artist_id }}" style="font-size: 14px; color: white;">{{ track.band }}</a>
             </div>
         </div>
     </div>
@@ -124,6 +124,71 @@
         border-radius: 20px;
         padding: 5px;
         background-color: transparent;
+    }
+
+    body {
+        background-color: #111;
+        color: #eee;
+    }
+
+    .recognize-window {
+        background-color: #222;
+    }
+
+    .artist-name, .artist-link {
+        color: #fff;
+    }
+
+    .charts-content-block {
+        background-color: #333;
+    }
+
+    .charts-song-cover {
+        border: 3px solid #444;
+    }
+
+    .share-button {
+        background-color: #444;
+        border: none;
+    }
+
+    .share-icon {
+        filter: invert(1);
+    }
+
+    a {
+        color: #6C9FF8;
+    }
+
+    a:hover {
+        color: #4B8DF8;
+    }
+
+    .charts-content-block {
+        background-color: #333;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        transition: transform 0.3s ease;
+        width: 220px;
+        height: 300px;
+        margin: 10px;
+    }
+
+    .charts-song-cover {
+        border: none;
+        border-radius: 10px;
+        margin-top: 15px;
+    }
+
+    .charts-content-block {
+        text-align: center;
+    }
+
+
+    .charts-content-block a {
+        display: block;
+        text-align: center;
+        margin-top: -5px;
     }
 </style>
 {% endblock %}

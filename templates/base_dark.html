@@ -27,15 +27,15 @@
 
 </head>
 <body style="background-color: #111; color: #ddd;">
-<header class="header-navigation-bar" style="background-color: #222;">
-    <nav class="navbar navbar-dark bg-primary">
+<header class="header-navigation-bar" style="background-color: black;">
+    <nav class="navbar navbar-dark bg-dark" style="background-color: black;">
         <!-- Логотип и название сайта -->
-        <div class="navbar-brand weight-500">
+        <div class="navbar-brand weight-500" style="background-color: black;">
             <img src="{{ url_for('static', filename='img/system/shazam.png') }}"
                  width="30" height="30" class="d-inline-block align-top" alt="">
             PyJam
         </div>
-        <div class="navbar-brand" style="font-size: 10px; font-weight: 500;">
+        <div class="navbar-brand" style="font-size: 10px; font-weight: 500; background-color: black;">
             <a class="navbar-brand {% if active_page == 'home' %}active{% endif %}" href="/rules"> Правила </a>
             <a class="navbar-brand {% if active_page == 'home' %}active{% endif %}" href="/"> Главная </a>
             <a class="navbar-brand {% if active_page == 'charts' %}active{% endif %}" href="/charts/world"> Хит-парад </a>
