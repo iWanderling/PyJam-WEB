@@ -3,6 +3,10 @@
 
 {% block content %}
 <style>
+    body {
+    background-color: #111;
+    color: #fff;
+    }
     .charts-song-cover {
         max-width: 100%;
         height: auto;
@@ -25,7 +29,7 @@
     }
 
     .charts-content-block {
-        margin-top: 20px; /* Увеличиваем отступ между треками */
+        margin-top: 20px;
     }
 
     .btn {
@@ -58,21 +62,21 @@
     .charts-song-info .artist-name {
         color: black;
         font-size: 18px;
-        font-weight: normal; /* Убираем жирность */
+        font-weight: normal;
     }
 
-    /* Обновляем стили для жирного синего названия трека */
     .charts-song-info .track-title {
         color: #007bff;
         font-weight: bold;
     }
 
     /* КАРТОЧКИ */
+        /* Стили для карточек */
         .card {
-            border: none;
-            border-radius: 1rem;
+            background-color: #333;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 1rem;
         }
 
         .card:hover {
@@ -170,9 +174,8 @@
 
         .card-text a {
             font-size: 1.5rem;
-            color: black;
+            color: white;
         }
-
 </style>
 
 

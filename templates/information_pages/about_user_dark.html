@@ -2,25 +2,76 @@
 {% block title %} Пользователь {% endblock %}
 
 {% block content %}
-<div class="container_track" style="margin-top: 150px;">
+<style>
+    body {
+        background-color: #111;
+        color: #fff;
+    }
+
+    .container_track {
+        margin-top: 150px;
+        background-color: #222;
+    }
+
+    .track-info {
+        margin-top: 0px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .track-image {
+        margin-right: 20px;
+    }
+
+    .img-fluid {
+        max-width: 300px; /* Максимальная ширина изображения */
+        border-radius: 10px; /* Скругление углов */
+    }
+
+    .track-details {
+        margin-top: 100px;
+    }
+
+    .track-title {
+        margin-bottom: 10px;
+        font-size: 24px;
+    }
+
+    .track-artist {
+        font-size: 18px;
+        margin-bottom: 5px;
+    }
+
+    .copy-link {
+        margin-top: 10px;
+    }
+
+    .share-button {
+        border: 0px solid #333;
+        border-radius: 20px;
+        padding: 5px;
+        background-color: transparent;
+    }
+</style>
+
+<div class="container_track">
     {% if user %}
-    <div class="track-info" style="margin-top: 0px;">
+    <div class="track-info">
         <div class="track-image">
             <img src="{{ user.background }}" alt="{{ user.name }}" class="img-fluid rounded-cover">
         </div>
         <div class="track-details">
-            <div style="margin-top: 100px;">
-                <h2 class="track-title" style="margin-bottom: 10px;">{{ user.name }} {{user.surname }}</h2>
-                <p class="track-artist">Дата регистрации: {{ user.date }}</p>
-                <p class="track-artist">🎶Распознал(-а) треков: {{ recognized_total }}</p>
-                <p class="track-artist">📖В библиотеке: {{ in_library }}</p>
-                <p class="track-artist">⭐В избранном: {{ in_featured }}</p>
-                <div class="copy-link" style="margin-top: 10px;">
-                    <button class="share-button" onclick="toggleImage('{{ link }}')">
-                        <img id="share-icon" src="https://cdn-icons-png.freepik.com/256/2958/2958783.png?ga=GA1.1.1487335546.1713716169&semt=ais_hybrid"
-                             class="share-icon" width="50" height="50" style="border: none;">
-                    </button>
-                </div>
+            <h2 class="track-title">{{ user.name }} {{user.surname }}</h2>
+            <p class="track-artist">Дата регистрации: {{ user.date }}</p>
+            <p class="track-artist">🎶Распознал(-а) треков: {{ recognized_total }}</p>
+            <p class="track-artist">📖В библиотеке: {{ in_library }}</p>
+            <p class="track-artist">⭐В избранном: {{ in_featured }}</p>
+            <div class="copy-link">
+                <button class="share-button" onclick="toggleImage('{{ link }}')">
+                    <img id="share-icon" src="https://cdn-icons-png.freepik.com/256/2958/2958783.png?ga=GA1.1.1487335546.1713716169&semt=ais_hybrid"
+                         class="share-icon" width="50" height="50" style="border: none;">
+                </button>
             </div>
         </div>
     </div>
@@ -46,14 +97,4 @@
         copyToClipboard(link);
     }
 </script>
-
-<style>
-    .share-button {
-        border: 0px solid #333;
-        border-radius: 20px;
-        padding: 5px;
-        background-color: transparent;
-    }
-
-</style>
 {% endblock %}
