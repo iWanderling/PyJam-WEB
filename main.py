@@ -535,11 +535,13 @@ def commons(page_type):
         является ссылкой на самого себя, благодаря чему пользователь может более подробно
         изучить ту или иную песню и музыку. """
 
+    # Фильтр Tracks: отображаем все загруженные на платформу треки:
     if page_type == 'tracks':
         tracks = sorted([t for t in db_sess.query(Track).all()], key=lambda track: track.popularity, reverse=True)
         return render_template(f'/nav_pages/commons{dt_prefix()}.html', top=tracks,
                                page_type='tracks')
 
+    # Фильтр Artists: отображаем всех загруженных на платформу исполнителей:
     elif page_type == 'artists':
         all_artists = []
 

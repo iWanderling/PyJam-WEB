@@ -165,6 +165,28 @@
         </div>
         <div style="margin-top: 50px;">
 
+            {% if active_users %}
+            <div class="text-center mb-5">
+                <h2 class="mb-4" style="color: #ddd;">Самые активные пользователи</h2>
+                <div class="row">
+                    {% for user in active_users %}
+                    <div class="col-md-4">
+                            <div class="card mb-4">
+                                <img src="{{ user.background }}" class="card-img-top" alt="{{ user.name }}">
+                                <div class="card-body">
+                                    <a href="/user/{{ user.id }}" class="card-link">
+                                        <h5 class="card-title">{{ user.name }} {{ user.surname }}</h5>
+                                    </a>
+                                    <p class="card-text">🎶Распознал(-а) треков: {{ user.total }}</p>
+                                    <p class="card-text">📖В библиотеке: {{ user.in_library }}</p>
+                                </div>
+                            </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
             {% if most_popular_tracks %}
             <div class="text-center mb-5">
                 <h2 class="mb-4" style="color: #ddd;">Популярные песни на платформе</h2>

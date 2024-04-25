@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %} Чарты {% endblock %}
+{% block title %} PyJam-Чарты {% endblock %}
 
 {% block content %}
 <style>
@@ -178,71 +178,172 @@
 
 <div style="margin-top: 15px; display: flex; flex-direction: column; align-items: center;"> Commons </div>
 <div style="margin-top: 75px; display: flex; flex-direction: column; align-items: center;">
-    <h1 class="top-100-heading"> Топ-треков на платформе </h1>
+    <h1 class="top-100-heading"> Фильтры </h1>
 </div>
-{% if top %}
-    <div class="row">
-        {% for i in top[:3] %}
-        <div class="col-md-4">
-            <div class="charts-content-block big-song" style="position: relative;">
-                <div class="badge badge-primary badge-pill d-flex justify-content-center align-items-center"
-                     style="position: absolute; top: 10px; right: 0px; top: 0; font-size: 60px; background-color: transparent; width: 40px; height: 60px; line-height: 40px; text-align: center; border-radius: 50%;">
-                    {% if loop.index == 1 %}
-                    🥇
-                    {% elif loop.index == 2 %}
-                    🥈
-                    {% else %}
-                    🥉
-                    {% endif %}
-                </div>
-                <span style="font-size: 24px;"></span>
-                <a href="/charts/track/{{ i.id }}" class="charts-song-link">
-                    <img class="charts-song-cover"
-                         src="{{ i.background }}"
-                         alt="Обложка трека">
+<div style="margin-bottom:30px; display: flex; flex-direction: column; align-items: center;">
+    <div style="display: flex;">
+        <a href="/commons/tracks" class="btn btn-primary rounded"> Песни и музыка </a>
+        <a href="/commons/artists" class="btn btn-danger rounded" style="margin-left: 5px"> Исполнители </a>
+    </div>
+</div>
+{% if page_type == 'tracks' %}
+    <div style="margin-top: 75px; display: flex; flex-direction: column; align-items: center;">
+        <h1 class="top-100-heading"> Топ-треков на платформе </h1>
+    </div>
+    {% if top %}
+        <div class="row">
+            {% for i in top[:3] %}
+            <div class="col-md-4">
+                <a href="/commons/track/{{ i.id }}" class="card-link">
+                    <div class="card mb-4">
+                        <img src="{{ i.background }}" class="card-img-top" alt="{{ i.track }}">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                {% if i.track %}
+                                    {% if i.track|length > 21 %}
+                                        {{i.track[:21]}}...
+                                    {% else %}
+                                        {{ i.track }}
+                                    {% endif %}
+                                {% endif %}
+                            </h5>
+                            <p class="card-text">🎤 <a href="/artist/shazam_id/{{ i.artist_id }}">
+                                {% if i.band %}
+                                    {% if i.band|length > 19 %}
+                                        {{i.band[:19]}}...
+                                    {% else %}
+                                        {{ i.band }}
+                                    {% endif %}
+                                {% endif %}
+                            </a></p>
+                            <p class="card-text">Распознан раз: {{ i.popularity }}</p>
+                        </div>
+                    </div>
                 </a>
-
-                <div class="charts-song-info">
-                    <a href="/charts/track/{{ i.id }}" class="charts-song-link track-title">
-                        {% if i.track %}
-                            {{ i.track[:20] }}...
-                        {% else %}
-                            {{ i.track }}
-                        {% endif %}
-                    </a><br>
-                    <a href="/artist/shazam_id/{{ i.artist_id }}" class="artist-name">{{ i.band }}</a>
-                </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
 
-    <div class="row">
-        {% for i in top[3:] %}
-        {% if loop.index % 3 == 1 %}
+        <div style="margin-top: 75px; display: flex; flex-direction: column; align-items: center;">
+            <h1 class="top-100-heading"> Все треки на платформе </h1>
+        </div>
+
+        <div class="row">
+            {% for i in top %}
+            {% if loop.index % 3 == 1 %}
+        </div>
+        <div class="row">
+            {% endif %}
+            <div class="col-md-4">
+                <a href="/commons/track/{{ i.id }}" class="card-link">
+                    <div class="card mb-4">
+                        <img src="{{ i.background }}" class="card-img-top" alt="{{ i.track }}">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                {% if i.track %}
+                                    {% if i.track|length > 21 %}
+                                        {{i.track[:21]}}...
+                                    {% else %}
+                                        {{ i.track }}
+                                    {% endif %}
+                                {% endif %}
+                            </h5>
+                            <p class="card-text">🎤 <a href="/artist/shazam_id/{{ i.artist_id }}">
+                                {% if i.band %}
+                                    {% if i.band|length > 19 %}
+                                        {{i.band[:19]}}...
+                                    {% else %}
+                                        {{ i.band }}
+                                    {% endif %}
+                                {% endif %}
+                            </a></p>
+                            <p class="card-text">Распознан раз: {{ i.popularity }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        </div>
+    {% else %}
+        <div style="margin-top: 75px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <h1 class="top-100-heading"> Станьте первооткрывателем на нашем сайте - распознайте первую песню! </h1>
+        </div>
+    {% endif %}
+
+
+
+<!-- ARTIST -->
+
+
+{% elif page_type == 'artists' %}
+    <div style="margin-top: 75px; display: flex; flex-direction: column; align-items: center;">
+            <h1 class="top-100-heading"> Топ-исполнителей на платформе </h1>
     </div>
+    {% if all_artists %}
     <div class="row">
-        {% endif %}
-        <div class="col-md-4">
-            <a href="/charts/track/{{ i.id }}" class="card-link">
+            {% for i in all_artists[:3] %}
+            <div class="col-md-4">
                 <div class="card mb-4">
-                    <img src="{{ i.background }}" class="card-img-top" alt="{{ i.track }}">
+                    <img src="{{ i[0].background }}" class="card-img-top" alt="{{ i[0].artist }}">
                     <div class="card-body">
-                        <h5 class="card-title">{{ i.track }}</h5>
-                        <p class="card-text">🎤 <a href="/artist/shazam_id/{{ i.artist_id }}">{{
-                            i.band }}</a></p>
-                        <p class="card-text">Распознано раз: {{ i.popularity }}</p>
+                        <a href="/commons/artist/{{ i[0].id }}">
+                            <h5 class="card-title">
+                                {% if i[0].artist %}
+                                    {% if i[0].artist|length > 21 %}
+                                        {{i[0].artist[:21]}}...
+                                    {% else %}
+                                        {{ i[0].artist }}
+                                    {% endif %}
+                                {% endif %}
+                            </h5>
+                        </a>
+                        <p class="card-text">Распознано треков: {{ i[1] }}</p>
+                        <p class="card-text">Треков на платформе: {{ i[2] }}</p>
                     </div>
                 </div>
-            </a>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
-    </div>
-{% else %}
-    <div style="margin-top: 75px; display: flex; flex-direction: column; align-items: center;">
-        <h1 class="top-100-heading"> Возникла непредвиденная ошибка! Сообщите об этом администратору! </h1>
-    </div>
 
+        <div style="margin-top: 75px; display: flex; flex-direction: column; align-items: center;">
+            <h1 class="top-100-heading"> Все исполнители на платформе </h1>
+        </div>
+
+        <div class="row">
+            {% for i in all_artists %}
+            {% if loop.index % 3 == 1 %}
+        </div>
+        <div class="row">
+            {% endif %}
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <img src="{{ i[0].background }}" class="card-img-top" alt="{{ i[0].artist }}">
+                    <div class="card-body">
+                        <a href="/commons/artist/{{ i[0].id }}">
+                            <h5 class="card-title">
+                                {% if i[0].artist %}
+                                    {% if i[0].artist|length > 21 %}
+                                        {{i[0].artist[:21]}}...
+                                    {% else %}
+                                        {{ i[0].artist }}
+                                    {% endif %}
+                                {% endif %}
+                            </h5>
+                        </a>
+                        <p class="card-text">Распознано треков: {{ i[1] }}</p>
+                        <p class="card-text">Треков на платформе: {{ i[2] }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        </div>
+    {% else %}
+        <div style="margin-top: 75px; display: flex; flex-direction: column; align-items: center; text-align: center;">
+            <h1 class="top-100-heading"> Станьте первооткрывателем на нашем сайте -
+                распознайте первого исполнителя! </h1>
+        </div>
+    {% endif %}
 {% endif %}
 {% endblock %}
