@@ -95,9 +95,6 @@ def is_admin():
 @app.route('/rules')
 def rules():
     """ Страница с основными правилами платформы """
-    if current_user.is_authenticated:
-        if current_user.is_dark_mode:
-            return render_template(f'/information_pages/rules{dt_prefix()}.html')
     return render_template(f'/information_pages/rules{dt_prefix()}.html')
 
 
@@ -524,10 +521,21 @@ def charts(country=None, genre=None):
                                genre_type=genres_list[genre])
 
     # Ошибка всегда происходит лишь на серверной стороне ShazamAPI, поэтому, если она происходит,
-    # то высылаем пользователю сообщение "о неполадках на сервере":
+    # то высылаем пользователю сообщение "о неполадках на сервере".
+    # ОБНОВЛЕНИЕ: в случае ошибки на стороне ShazamAPI, реализована "запасная страница" со всеми треками на
+    # платформе и статистикой по ним:
     except Exception as e:
         status_error = e
-        return render_template(f'/nav_pages/charts{dt_prefix()}.html', top=[])
+        return redirect('/commons')
+
+        # OLD: return render_template(f'/nav_pages/charts{dt_prefix()}.html', top=[])
+
+
+@app.route('/commons')
+def commons():
+    tracks = sorted([t for t in db_sess.query(Track).all()], key=lambda track: track.popularity, reverse=True)
+
+    return render_template(f'/nav_pages/commons{dt_prefix()}.html', top=tracks)
 
 
 @app.route('/recognize/track/<int:track_id>')
@@ -1170,7 +1178,7 @@ def administrator():
 
     # Если проверка пройдена, то загружаем кабинет администратора:
     users = [u for u in db_sess.query(User).all() if u.id > 0]
-    return render_template(f'/admin_page/admin_dark{dt_prefix()}.html', users=users)
+    return render_template(f'/admin_page/admin{dt_prefix()}.html', users=users)
 
 
 @app.route('/administrator/reset_user/<int:user_id>')
