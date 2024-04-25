@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% block title %} Чарты {% endblock %}
+
+{% block content %}
+<style>
+    .charts-song-cover {
+        max-width: 100%;
+        height: auto;
+        transition: transform 0.3s ease;
+    }
+
+    .charts-song-info {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 18px;
+    }
+
+    .charts-song-link {
+        text-decoration: none;
+    }
+
+    .charts-song-link:hover .charts-song-cover {
+        transform: scale(1.03);
+    }
+
+    .charts-content-block {
+        margin-top: 20px; /* Увеличиваем отступ между треками */
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        font-size: 2rem;
+        line-height: 1.5;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        cursor: pointer;
+        border: none;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+        color: #fff;
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .btn:hover {
+        opacity: 0.8;
+        background-color: #000;
+    }
+
+    .charts-song-info .track-title {
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    .charts-song-info .artist-name {
+        color: black;
+        font-size: 18px;
+        font-weight: normal; /* Убираем жирность */
+    }
+
+    /* Обновляем стили для жирного синего названия трека */
+    .charts-song-info .track-title {
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    /* КАРТОЧКИ */
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .top-100-heading {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-img-top {
+            border-radius: 1rem 1rem 0 0;
+        }
+
+        .badge-primary {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* СТАТИСТИКА */
+        .statistic-container {
+            margin-top: 3rem;
+            padding: 2rem;
+            background-color: #f8f9fa;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .statistic-item {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .statistic-label {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .statistic-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+            animation: appear 1s ease-out;
+        }
+
+        .statistic-item {
+            background-color: #f8f9fa;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .statistic-content {
+            padding: 0.5rem 1rem;
+        }
+
+        .statistic-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes appear {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-title a {
+            font-size: 2rem;
+        }
+
+        .card-text a {
+            font-size: 1.5rem;
+            color: black;
+        }
+
+</style>
+
+
+<div style="margin-top: 15px; display: flex; flex-direction: column; align-items: center;"> Commons </div>
+<div style="margin-top: 75px; display: flex; flex-direction: column; align-items: center;">
+    <h1 class="top-100-heading"> Топ-треков на платформе </h1>
+</div>
+{% if top %}
+    <div class="row">
+        {% for i in top[:3] %}
+        <div class="col-md-4">
+            <div class="charts-content-block big-song" style="position: relative;">
+                <div class="badge badge-primary badge-pill d-flex justify-content-center align-items-center"
+                     style="position: absolute; top: 10px; right: 0px; top: 0; font-size: 60px; background-color: transparent; width: 40px; height: 60px; line-height: 40px; text-align: center; border-radius: 50%;">
+                    {% if loop.index == 1 %}
+                    🥇
+                    {% elif loop.index == 2 %}
+                    🥈
+                    {% else %}
+                    🥉
+                    {% endif %}
+                </div>
+                <span style="font-size: 24px;"></span>
+                <a href="/charts/track/{{ i.id }}" class="charts-song-link">
+                    <img class="charts-song-cover"
+                         src="{{ i.background }}"
+                         alt="Обложка трека">
+                </a>
+
+                <div class="charts-song-info">
+                    <a href="/charts/track/{{ i.id }}" class="charts-song-link track-title">
+                        {% if i.track %}
+                            {{ i.track[:20] }}...
+                        {% else %}
+                            {{ i.track }}
+                        {% endif %}
+                    </a><br>
+                    <a href="/artist/shazam_id/{{ i.artist_id }}" class="artist-name">{{ i.band }}</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="row">
+        {% for i in top[3:] %}
+        {% if loop.index % 3 == 1 %}
+    </div>
+    <div class="row">
+        {% endif %}
+        <div class="col-md-4">
+            <a href="/charts/track/{{ i.id }}" class="card-link">
+                <div class="card mb-4">
+                    <img src="{{ i.background }}" class="card-img-top" alt="{{ i.track }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ i.track }}</h5>
+                        <p class="card-text">🎤 <a href="/artist/shazam_id/{{ i.artist_id }}">{{
+                            i.band }}</a></p>
+                        <p class="card-text">Распознано раз: {{ i.popularity }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    </div>
+{% else %}
+    <div style="margin-top: 75px; display: flex; flex-direction: column; align-items: center;">
+        <h1 class="top-100-heading"> Возникла непредвиденная ошибка! Сообщите об этом администратору! </h1>
+    </div>
+
+{% endif %}
+{% endblock %}

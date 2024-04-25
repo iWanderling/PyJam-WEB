@@ -111,10 +111,6 @@
         </div>
     </div>
 </div>
-
-
-
-
 {% if top %}
     <div class="row">
         {% for i in top[:3] %}
@@ -161,7 +157,7 @@
                 </a>
 
                 <div class="charts-song-info">
-                    <a href="/charts/track/{{ i.id }}" class="charts-song-link " style="font-size: 20px; font-weight: bold;">{{loop.index + 3}}. {{ i.track }}</a><br>
+                    <a href="/charts/track/{{ i.id }}" class="charts-song-link" style="font-size: 20px; font-weight: bold;">{{loop.index + 3}}. {{ i.track }}</a><br>
                     <a href="/artist/shazam_id/{{ i.artist_id }}" style="font-size: 15px; color: black;">{{ i.band }}</a>
                 </div>
             </div>

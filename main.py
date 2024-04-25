@@ -73,7 +73,6 @@ def dt_prefix():
 @login_manager.user_loader
 def load_user(user_id):
     """ Загрузка пользователя """
-    db_sess = db_session.create_session()
     return db_sess.query(User).get(user_id)
 
 
@@ -87,8 +86,8 @@ def page_error_code(e):
 
 def is_admin():
     """ Проверка: является ли текущий на сайте пользователь администратором """
-    is_admin = current_user.is_authenticated and current_user.id == 1
-    if not is_admin:
+    is_admin_ = current_user.is_authenticated and current_user.id == 1
+    if not is_admin_:
         return abort(403)
 
 
@@ -105,7 +104,7 @@ def main():
          а также топы: самых активных пользователей, самых популярных треков, самых популярных исполнителей. """
 
     # Загрузка информации о зарегистрированных пользователях:
-    users = list(sorted(db_sess.query(User).all(), key=lambda u: len(u.unique.split('&')), reverse=True))
+    users = list(sorted(db_sess.query(User).all(), key=lambda us: len(us.unique.split('&')), reverse=True))
 
     # Загрузка информации о библиотеке сайта:
     big_library = db_sess.query(Recognized).all()
@@ -249,9 +248,6 @@ def reqister():
                                    form=form,
                                    message="Слишком длинное имя / фамилия")
 
-        # Создаём сессию:
-        db_sess = db_session.create_session()
-
         # 4. Если данные уже есть в базе, то отправляем соответствующее сообщение,
         # иначе - продолжаем процесс регистрации:
         if db_sess.query(User).filter(User.email == form.email.data).first():
@@ -301,7 +297,6 @@ def login():
 
         # Создание сессии, обработка введённых пользователем данных
         # Незамедлительно авторизуем пользователя при успешном прохождении авторизации:
-        db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.email == form.email.data).first()
 
         # Авторизация:
@@ -409,14 +404,18 @@ def recognize():
                 already_recognized = db_sess.query(Recognized).filter(
                     Recognized.track_id == track_id, Recognized.user_id == current_user.id).first()
 
-                # Если трек уже распознан, то перезаписываем его в БД:
+                # Если трек уже распознан, то перезаписываем его в БД, сохраняя данные об избранности:
+                do_favor = 0
                 if already_recognized:
+                    if already_recognized.is_favourite:
+                        do_favor = 1
+
                     db_sess.delete(already_recognized)
 
                 recognized = Recognized()
                 recognized.user_id = current_user.id
                 recognized.track_id = track_id
-                recognized.is_favourite = False
+                recognized.is_favourite = do_favor
 
                 # Увеличиваем количество распознанных пользователем уникальных треков, если этот
                 # трек он распознал впервые:
@@ -526,19 +525,39 @@ def charts(country=None, genre=None):
     # платформе и статистикой по ним:
     except Exception as e:
         status_error = e
-        return redirect('/commons')
-
-        # OLD: return render_template(f'/nav_pages/charts{dt_prefix()}.html', top=[])
+        return redirect('/commons/tracks')
 
 
-@app.route('/commons')
-def commons():
-    tracks = sorted([t for t in db_sess.query(Track).all()], key=lambda track: track.popularity, reverse=True)
+@app.route('/commons/<page_type>')
+def commons(page_type):
+    """ Вторая страница чартов, способная заменить первую в случае сбоя в работе SHAZAMAPI.
+        Отображает информацию обо всех треках, существующих на платформе. Каждый трек
+        является ссылкой на самого себя, благодаря чему пользователь может более подробно
+        изучить ту или иную песню и музыку. """
 
-    return render_template(f'/nav_pages/commons{dt_prefix()}.html', top=tracks)
+    if page_type == 'tracks':
+        tracks = sorted([t for t in db_sess.query(Track).all()], key=lambda track: track.popularity, reverse=True)
+        return render_template(f'/nav_pages/commons{dt_prefix()}.html', top=tracks,
+                               page_type='tracks')
+
+    elif page_type == 'artists':
+        all_artists = []
+
+        for art in db_sess.query(Artist).all():
+            # Список со всеми треками исполнителя, а также получение количества всех треков исполнителя:
+            all_artist_tracks = db_sess.query(Track).filter(Track.artist_id == art.shazam_id).all()
+            platform_tracks = len(all_artist_tracks)
+            apt = sum([t.popularity for t in all_artist_tracks])
+            all_artists.append([art, apt, platform_tracks])
+
+        all_artists.sort(key=lambda x: x[1])
+        return render_template(f'/nav_pages/commons{dt_prefix()}.html', all_artists=all_artists,
+                               page_type='artists')
+    return redirect('/commons/tracks')
 
 
 @app.route('/recognize/track/<int:track_id>')
+@app.route('/commons/track/<int:track_id>')
 @app.route('/charts/track/<int:track_id>')
 @app.route('/track/<int:track_id>')
 def track_info(track_id):
@@ -682,6 +701,9 @@ def download_artist(artist_id):
     return redirect(f'/artist/{artist_db_id}')
 
 
+@app.route('/recognized/artist/<int:artist_id>')
+@app.route('/commons/artist/<int:artist_id>')
+@app.route('/charts/artist/<int:artist_id>')
 @app.route('/artist/<int:artist_id>')
 def about_artist(artist_id):
     """ Данная страница отображает краткую информацию об исполнителе, которого ищет пользователь.
@@ -742,6 +764,7 @@ def about_artist(artist_id):
         # Список со всеми треками исполнителя, а также получение количества всех треков исполнителя:
         all_artist_tracks = db_sess.query(Track).filter(Track.artist_id == artist_shazam_id).all()
         platform_tracks = len(all_artist_tracks)
+        artist_popularity_total = sum([t.popularity for t in all_artist_tracks])
 
         # Загрузка изображений:
         asyncio.run(download_image_handler(background_to_download, 'track'))
@@ -749,14 +772,14 @@ def about_artist(artist_id):
         # Отображение страницы:
         return render_template(f'/information_pages/about_artist{dt_prefix()}.html',
                                artist=artist, best_tracks=best_tracks[:3], platform_tracks=platform_tracks,
-                               all_tracks=all_artist_tracks, link=link)
+                               all_tracks=all_artist_tracks, link=link, apt=artist_popularity_total)
     except Exception as e:
         status_error = e
         return render_template(f'/information_pages/about_artist{dt_prefix()}.html')
 
 
 @app.route('/library')
-def user_library():
+def user_library_handler():
     """ Данная страница представляет собою виртуальную библиотеку, в которой хранится информация обо всех
         треках, что смог распознать пользователь сайта.
         Библиотека доступна только для авторизованных пользователей.
@@ -964,7 +987,6 @@ def edit_cabinet():
         # Если пользователь подтвердил изменения, то обрабатываем условия; если все условия соблюдены, то
         # производим обновление информации:
         if form.validate_on_submit():
-            db_sess = db_session.create_session()
 
             # 1. Новый E-Mail пользователя не используется другим пользователем на платформе:
             is_user_already_exists = db_sess.query(User).filter(User.email == form.email.data,
@@ -1021,8 +1043,6 @@ def edit_password():
 
         # Если пользователь подтверждает изменения, то проверяем условия, после чего обновляем пароль:
         if form.validate_on_submit():
-            db_sess = db_session.create_session()
-
             current_password = form.current_password.data
             new_password = form.new_password.data
             repeat_password = form.repeat_password.data
@@ -1078,7 +1098,6 @@ def delete_profile():
 
         # Если пользователь подтверждает удаление, то проверяем условия, после чего удаляем его профиль:
         if form.validate_on_submit():
-            db_sess = db_session.create_session()
             user = db_sess.query(User).filter(User.id == current_user.id).first()
 
             email = form.email.data

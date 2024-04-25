@@ -27,8 +27,9 @@
 
 </head>
 <body>
-<header class="header-navigation-bar">
-    <nav class="navbar navbar-dark bg-primary">
+<header class="header-navigation-bar" style="border-radius: 0 0 25px 25px;">
+    {% if current_user.is_authenticated and current_user.is_dark_mode == 1 %}
+        <nav class="navbar navbar-dark" style="border-radius: 0 0 22px 22px; background-color: #1c1c1c">
         <!-- Логотип и название сайта -->
         <div class="navbar-brand weight-500">
             <img src="{{ url_for('static', filename='img/system/shazam.png') }}"
@@ -36,17 +37,10 @@
             PyJam
         </div>
         <div class="navbar-brand" style="font-size: 10px; font-weight: 500;">
-            {% if current_user.is_authenticated %}
-                {% if current_user.is_dark_mode == 0 %}
-                    <a class="btn btn-dark" style="margin-right: 25px" href="/cabinet/dark_mode"> Тёмная тема </a>
-                {% else %}
-                    <a class="btn btn-light" style="margin-right: 25px" href="/cabinet/dark_mode"> Светлая тема </a>
-                {% endif %}
-            {% endif %}
-
             <a class="navbar-brand {% if active_page == 'home' %}active{% endif %}" href="/rules"> Правила </a>
             <a class="navbar-brand {% if active_page == 'home' %}active{% endif %}" href="/"> Главная </a>
             <a class="navbar-brand {% if active_page == 'charts' %}active{% endif %}" href="/charts/world"> Хит-парад </a>
+            <a class="navbar-brand {% if active_page == 'charts' %}active{% endif %}" href="/commons/tracks"> PyJam-Чарты</a>
             <a class="navbar-brand {% if active_page == 'recognize' %}active{% endif %}" href="/recognize"> Распознать </a>
             {% if current_user.is_authenticated %}
                 <a class="navbar-brand {% if active_page == 'library' %}active{% endif %}" href="/library"> Библиотека </a>
@@ -56,6 +50,30 @@
             {% endif %}
         </div>
     </nav>
+    {% else %}
+        <nav class="navbar navbar-dark bg-primary" style="border-radius: 0 0 22px 22px;">
+        <!-- Логотип и название сайта -->
+        <div class="navbar-brand weight-500">
+            <img src="{{ url_for('static', filename='img/system/shazam.png') }}"
+                 width="30" height="30" class="d-inline-block align-top" alt="">
+            PyJam
+        </div>
+        <div class="navbar-brand" style="font-size: 10px; font-weight: 500;">
+            <a class="navbar-brand {% if active_page == 'home' %}active{% endif %}" href="/rules"> Правила </a>
+            <a class="navbar-brand {% if active_page == 'home' %}active{% endif %}" href="/"> Главная </a>
+            <a class="navbar-brand {% if active_page == 'charts' %}active{% endif %}" href="/charts/world"> Хит-парад </a>
+            <a class="navbar-brand {% if active_page == 'charts' %}active{% endif %}" href="/commons/tracks"> PyJam-Чарты</a>
+            <a class="navbar-brand {% if active_page == 'recognize' %}active{% endif %}" href="/recognize"> Распознать </a>
+            {% if current_user.is_authenticated %}
+                <a class="navbar-brand {% if active_page == 'library' %}active{% endif %}" href="/library"> Библиотека </a>
+                <a class="navbar-brand" href="/cabinet"> Личный Кабинет </a>
+            {% else %}
+                <a class="navbar-brand {% if active_page == 'login' %}active{% endif %}" href="/login"> Войти </a>
+            {% endif %}
+        </div>
+    </nav>
+    {% endif %}
+
 </header>
 <main role="main" class="container">
     {% block content %}{% endblock %}
