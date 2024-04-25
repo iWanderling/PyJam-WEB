@@ -552,7 +552,7 @@ def commons(page_type):
             apt = sum([t.popularity for t in all_artist_tracks])
             all_artists.append([art, apt, platform_tracks])
 
-        all_artists.sort(key=lambda x: x[1])
+        all_artists.sort(key=lambda x: x[1], reverse=True)
         return render_template(f'/nav_pages/commons{dt_prefix()}.html', all_artists=all_artists,
                                page_type='artists')
     return redirect('/commons/tracks')
@@ -577,7 +577,9 @@ def track_info(track_id):
 
     # Иначе, находим трек и отправляем данные:
     track = db_sess.query(Track).filter(Track.id == track_id).first()
-    return render_template(f'/information_pages/track{dt_prefix()}.html', track=track, link=link)
+    in_library = len(db_sess.query(Recognized).filter(Recognized.track_id == track.id).all())
+    return render_template(f'/information_pages/track{dt_prefix()}.html',
+                           track=track, link=link, in_library=in_library)
 
 
 @app.route('/similiar/track/<int:track_id>')
@@ -890,14 +892,20 @@ def cabinet():
     if current_user.is_authenticated:
 
         # Собираем статистику пользователя, чтобы отобразить её в ЛК:
-        users = db_sess.query(User).all()
+        users = [u for u in db_sess.query(User).all() if u.id > 1]
         user = db_sess.query(User).filter(User.id == current_user.id).first()
 
         user_unique_total = len(user.unique.split('&')) - 1
         user_in_library = len(db_sess.query(Recognized).filter(Recognized.user_id == user.id).all())
         user_in_featured = len(db_sess.query(Recognized).filter(Recognized.user_id == user.id,
                                                                 Recognized.is_favourite == 1).all())
-        user_in_top = list(sorted(users, key=lambda u: len(u.unique.split('&')), reverse=True)).index(user) + 1
+
+        try:
+            user_in_top = (list(sorted(users, key=lambda u: len(u.unique.split('&')), reverse=True))
+                           .index(user) + 1)
+        except Exception as e:
+            status_error = e
+            user_in_top = 0
 
         # Если пользователь не загружает изображение в свой профиль, то отправляем статистику и доступ к функциям:
         if request.method == 'GET':

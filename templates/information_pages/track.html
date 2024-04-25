@@ -12,7 +12,8 @@
             <div style="margin-top: 100px;">
                 <h2 class="track-title" style="margin-bottom: 10px;">{{ track.track }}</h2><br>
                 <p class="track-artist">🎤{{ track.band }}</p>
-                <p class="track-artist">🎶Распознан раз: {{track.popularity}} </p><br>
+                <p class="track-artist">🎶Распознан раз: {{track.popularity}} </p>
+                <p class="track-artist">📖В библиотеке: {{in_library}} </p><br>
                 <div class="copy-link" style="margin-top: 10px;">
                     <button class="share-button" onclick="toggleImage('{{ link }}')">
                         <img id="share-icon" src="https://cdn-icons-png.freepik.com/256/2958/2958783.png?ga=GA1.1.1487335546.1713716169&semt=ais_hybrid"
