@@ -25,6 +25,7 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     background = sqlalchemy.Column(sqlalchemy.String)  # Изображение профиля
     date = sqlalchemy.Column(sqlalchemy.String, default=get_valid_date)  # Дата регистрации
     warns = sqlalchemy.Column(sqlalchemy.Integer, default=0)  # Количество предупреждений
+    is_dark_mode = sqlalchemy.Column(sqlalchemy.Integer, default=0)  # Включена ли тёмная тема
 
     # Кэшировать пароль:
     def set_password(self, password):

@@ -36,6 +36,14 @@
             PyJam
         </div>
         <div class="navbar-brand" style="font-size: 10px; font-weight: 500;">
+            {% if current_user.is_authenticated %}
+                {% if current_user.is_dark_mode == 0 %}
+                    <a class="btn btn-dark" style="margin-right: 25px" href="/cabinet/dark_mode"> Тёмная тема </a>
+                {% else %}
+                    <a class="btn btn-light" style="margin-right: 25px" href="/cabinet/dark_mode"> Светлая тема </a>
+                {% endif %}
+            {% endif %}
+
             <a class="navbar-brand {% if active_page == 'home' %}active{% endif %}" href="/rules"> Правила </a>
             <a class="navbar-brand {% if active_page == 'home' %}active{% endif %}" href="/"> Главная </a>
             <a class="navbar-brand {% if active_page == 'charts' %}active{% endif %}" href="/charts/world"> Хит-парад </a>

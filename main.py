@@ -59,6 +59,17 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
+def dt_prefix():
+    """ DT_Prefix -> DarkTheme_Prefix. Функция для обработки выбранной пользователем темы.
+        Prefix - префикс для HTML-файла. Если у пользователя тёмная тема, то будет использоваться префикс _dark,
+                 иначе, префикс будет пустым и отобразиться стандартная страница.
+        Пример: nav_pages/main{dt_prefix()}.html """
+    if current_user.is_authenticated:
+        if current_user.is_dark_mode:
+            return '_dark'
+    return ''
+
+
 @login_manager.user_loader
 def load_user(user_id):
     """ Загрузка пользователя """
@@ -71,7 +82,7 @@ def load_user(user_id):
 @app.errorhandler(404)
 def page_error_code(e):
     """ Обработчики ошибок на странице """
-    return render_template('handlers/error_handler.html', error_status=f'Ошибка: {e}')
+    return render_template(f'handlers/error_handler{dt_prefix()}.html', error_status=f'Ошибка: {e}')
 
 
 def is_admin():
@@ -84,7 +95,10 @@ def is_admin():
 @app.route('/rules')
 def rules():
     """ Страница с основными правилами платформы """
-    return render_template('/information_pages/rules.html')
+    if current_user.is_authenticated:
+        if current_user.is_dark_mode:
+            return render_template(f'/information_pages/rules{dt_prefix()}.html')
+    return render_template(f'/information_pages/rules{dt_prefix()}.html')
 
 
 @app.route('/', methods=["GET", "POST"])
@@ -193,7 +207,7 @@ def main():
                            track_on_platform, artist_on_platform])
 
     # Отображаем информацию:
-    return render_template('nav_pages/main.html',
+    return render_template(f'nav_pages/main{dt_prefix()}.html',
                            all_users=all_users, active_users=active_users,
                            show_statistics=show_statistics, recognized_total=recognized_total,
                            library_tracks=in_library_tracks, feature_tracks=in_feature_tracks,
@@ -222,19 +236,19 @@ def reqister():
     if form.validate_on_submit():
         # 1. Проверка пароля на надёжность:
         if any([len(form.password.data) < 9, form.password.data.isdigit()]):
-            return render_template('/authentication_pages/register.html', title='Регистрация',
+            return render_template(f'/authentication_pages/register{dt_prefix()}.html', title='Регистрация',
                                    message="Пароль содержит менее 9 символов или содержит только цифры",
                                    form=form)
 
         # 2. Проверка полей с паролями на совпадение:
         if form.password.data != form.password_again.data:
-            return render_template('/authentication_pages/register.html', title='Регистрация',
+            return render_template(f'/authentication_pages/register{dt_prefix()}.html', title='Регистрация',
                                    form=form,
                                    message="Пароли не совпадают")
 
         # 3. Проверка имени и фамилии:
         if len(form.name.data) > 41 or len(form.surname.data) > 41:
-            return render_template('/authentication_pages/register.html', title='Регистрация',
+            return render_template(f'/authentication_pages/register{dt_prefix()}.html', title='Регистрация',
                                    form=form,
                                    message="Слишком длинное имя / фамилия")
 
@@ -244,7 +258,7 @@ def reqister():
         # 4. Если данные уже есть в базе, то отправляем соответствующее сообщение,
         # иначе - продолжаем процесс регистрации:
         if db_sess.query(User).filter(User.email == form.email.data).first():
-            return render_template('/authentication_pages/register.html', title='Регистрация',
+            return render_template(f'/authentication_pages/register{dt_prefix()}.html', title='Регистрация',
                                    form=form,
                                    message="Такой пользователь уже есть")
 
@@ -270,7 +284,7 @@ def reqister():
         return redirect('/login')
 
     # Отображение страницы регистрации:
-    return render_template('/authentication_pages/register.html', title='Регистрация', form=form)
+    return render_template(f'/authentication_pages/register{dt_prefix()}.html', title='Регистрация', form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -299,10 +313,11 @@ def login():
             return redirect("/cabinet")
 
         # Если пользователь ввёл некорректные данные, то выводим соответствующее сообщение:
-        return render_template('/authentication_pages/login.html', message="Неправильный логин или пароль", form=form)
+        return render_template(f'/authentication_pages/login{dt_prefix()}.html',
+                               message="Неправильный логин или пароль", form=form)
 
     # Отображение страницы авторизации:
-    return render_template('/authentication_pages/login.html', title='Авторизация', form=form)
+    return render_template(f'/authentication_pages/login{dt_prefix()}.html', title='Авторизация', form=form)
 
 
 @app.route('/logout')
@@ -326,7 +341,7 @@ def recognize():
         # Если пользователь ничего не отправил - возвращаем обычную страницу:
         if request.method == "GET":
             background = url_for('static', filename=f'img/system/{UNKNOWN_SONG}')
-            return render_template('/nav_pages/recognize_song.html', background=background)
+            return render_template(f'/nav_pages/recognize_song{dt_prefix()}.html', background=background)
 
         # Если пользователь отправил файл на распознание, то возвращаем пользователю информацию о распознанном треке:
         elif request.method == "POST":
@@ -335,7 +350,8 @@ def recognize():
             # Загружаем отправленный пользователем файл, если пользователь ничего не отправил - перезагружаем страницу:
             f = request.files['file']
             if not f.filename:
-                return render_template('/nav_pages/recognize_song.html', message='Вы не отправили файл', background=background)
+                return render_template(f'/nav_pages/recognize_song{dt_prefix()}.html',
+                                       message='Вы не отправили файл', background=background)
 
             # Создаём уникальный путь для аудиофайла, которое мы будем загружать,
             # а затем сохраняем файл по указанному пути. После система его распознаёт и автоматически удаляет файл:
@@ -422,7 +438,8 @@ def recognize():
             return redirect(f'/recognize/track/{track_id}')
     except Exception as e:
         status_error = e
-        return render_template('/nav_pages/recognize_song.html', message='Произошла ошибка. Попробуйте ещё раз!')
+        return render_template(f'/nav_pages/recognize_song{dt_prefix()}.html',
+                               message='Произошла ошибка. Попробуйте ещё раз!')
 
 
 @app.route('/charts/<country>/<genre>')
@@ -502,7 +519,7 @@ def charts(country=None, genre=None):
             asyncio.run(download_image_handler(background_to_download, 'track'))
 
         # Возвращаем информацию:
-        return render_template('/nav_pages/charts.html', top=top, available_genres=available_genres,
+        return render_template(f'/nav_pages/charts{dt_prefix()}.html', top=top, available_genres=available_genres,
                                country=country_list[country], country_code=country, genres_list=genres_list,
                                genre_type=genres_list[genre])
 
@@ -510,7 +527,7 @@ def charts(country=None, genre=None):
     # то высылаем пользователю сообщение "о неполадках на сервере":
     except Exception as e:
         status_error = e
-        return render_template('/nav_pages/charts.html', top=[])
+        return render_template(f'/nav_pages/charts{dt_prefix()}.html', top=[])
 
 
 @app.route('/recognize/track/<int:track_id>')
@@ -527,11 +544,11 @@ def track_info(track_id):
 
     # Если трек не удалось распознать, то ничего не отправляем на вывод:
     if track_id == 0:
-        return render_template('/information_pages/track.html')
+        return render_template(f'/information_pages/track{dt_prefix()}.html')
 
     # Иначе, находим трек и отправляем данные:
     track = db_sess.query(Track).filter(Track.id == track_id).first()
-    return render_template('/information_pages/track.html', track=track, link=link)
+    return render_template(f'/information_pages/track{dt_prefix()}.html', track=track, link=link)
 
 
 @app.route('/similiar/track/<int:track_id>')
@@ -549,7 +566,7 @@ def similiar_songs(track_id):
 
         # Если у трека нет ключа, то ничего не возвращаем:
         if not track_key:
-            return render_template('/information_pages/similiar_songs.html')
+            return render_template(f'/information_pages/similiar_songs{dt_prefix()}.html')
 
         # Получаем информацию обо всех похожих песнях:
         songs = get_similiar_songs(track_key)
@@ -590,11 +607,11 @@ def similiar_songs(track_id):
         asyncio.run(download_image_handler(background_to_download, 'track'))
 
         # Возвращаем информацию:
-        return render_template('/information_pages/similiar_songs.html', track_owner=track_owner,
+        return render_template(f'/information_pages/similiar_songs{dt_prefix()}.html', track_owner=track_owner,
                                similiar_tracks=similiar_tracks)
     except Exception as e:
         status_error = e
-        return render_template('/information_pages/similiar_songs.html')
+        return render_template(f'/information_pages/similiar_songs{dt_prefix()}.html')
 
 @app.route('/artist/track/<int:track_id>')
 def track_to_artist(track_id):
@@ -605,7 +622,7 @@ def track_to_artist(track_id):
         return redirect(f'/artist/shazam_id/{artist_shazam_id}')
     except Exception as e:
         status_error = e
-        return render_template('/information_pages/about_artist.html')
+        return render_template(f'/information_pages/about_artist{dt_prefix()}.html')
 
 @app.route('/artist/shazam_id/<int:artist_id>')
 def download_artist(artist_id):
@@ -628,7 +645,7 @@ def download_artist(artist_id):
         try:
             all_artist_info = get_artist_info(artist_shazam_id)
         except KeyError:
-            return render_template('/information_pages/about_artist.html')
+            return render_template(f'/information_pages/about_artist{dt_prefix()}.html')
 
         # Если всё прошло успешно, то загружаем данные:
         artist_shazam_id, artist_title, genre, background = all_artist_info[0][:4]
@@ -672,7 +689,7 @@ def about_artist(artist_id):
         # Если artist_id == 0 (исполнитель не найден), то возвращаем пустую страницу с соответствующим сообщением,
         # иначе - продолжаем обработку информации:
         if not artist_id:
-            return render_template('/information_pages/about_artist.html')
+            return render_template(f'/information_pages/about_artist{dt_prefix()}.html')
 
         # Загружаем ссылку на исполнителя:
         o = urlparse(request.base_url)
@@ -722,11 +739,12 @@ def about_artist(artist_id):
         asyncio.run(download_image_handler(background_to_download, 'track'))
 
         # Отображение страницы:
-        return render_template('/information_pages/about_artist.html', artist=artist, best_tracks=best_tracks[:3],
-                               platform_tracks=platform_tracks, all_tracks=all_artist_tracks, link=link)
+        return render_template(f'/information_pages/about_artist{dt_prefix()}.html',
+                               artist=artist, best_tracks=best_tracks[:3], platform_tracks=platform_tracks,
+                               all_tracks=all_artist_tracks, link=link)
     except Exception as e:
         status_error = e
-        return render_template('/information_pages/about_artist.html')
+        return render_template(f'/information_pages/about_artist{dt_prefix()}.html')
 
 
 @app.route('/library')
@@ -751,10 +769,10 @@ def user_library():
             library.append((track, i))
 
         # Отправляем страницу с библиотекой
-        return render_template('/user_pages/library.html', library=reversed(library))
+        return render_template(f'/user_pages/library{dt_prefix()}.html', library=reversed(library))
 
     # Отображаем пустую страницу с сообщением, если пользователь ещё не авторизовался на сайте:
-    return render_template('/user_pages/library.html')
+    return render_template(f'/user_pages/library{dt_prefix()}.html')
 
 
 @app.route('/delete/track/<int:track_id>', methods=["GET"])
@@ -793,8 +811,8 @@ def featured():
             track = db_sess.query(Track).filter(Track.id == i.track_id).first()
             featured_library.append((track, i))
 
-        return render_template('/user_pages/library.html', library=reversed(featured_library))
-    return render_template('/user_pages/library.html')
+        return render_template(f'/user_pages/library{dt_prefix()}.html', library=reversed(featured_library))
+    return render_template(f'/user_pages/library{dt_prefix()}.html')
 
 
 @app.route('/feature/track/<int:track_id>', methods=["GET"])
@@ -850,7 +868,7 @@ def cabinet():
 
         # Если пользователь не загружает изображение в свой профиль, то отправляем статистику и доступ к функциям:
         if request.method == 'GET':
-            return render_template('/user_pages/cabinet.html', rec_count=user_unique_total,
+            return render_template(f'/user_pages/cabinet{dt_prefix()}.html', rec_count=user_unique_total,
                                    library_count=user_in_library, featured_count=user_in_featured,
                                    intop_position=user_in_top, date=user.date)
 
@@ -862,7 +880,7 @@ def cabinet():
             # Если пользователь не загрузил файл, но нажал на кнопку, или же он
             # отправил не изображение, то возвращаем обычную страницу:
             if not f.filename or not any([photo_filename[-4:] == '.png', photo_filename[-4:] == '.jpg']):
-                return render_template('/user_pages/cabinet.html', rec_count=user_unique_total,
+                return render_template(f'/user_pages/cabinet{dt_prefix()}.html', rec_count=user_unique_total,
                                        library_count=user_in_library, featured_count=user_in_featured,
                                        intop_position=user_in_top, date=user.date)
 
@@ -874,7 +892,7 @@ def cabinet():
             return redirect('/cabinet')
 
     # Загружаем ЛК:
-    return render_template('/user_pages/cabinet.html')
+    return render_template(f'/user_pages/cabinet{dt_prefix()}.html')
 
 
 @app.route('/cabinet/set_default')
@@ -891,8 +909,28 @@ def cabinet_set_default_profile():
         else:
             user.background = url_for('static', filename='img/user_profile/woman.png')
 
-        # Сохраняем изменению и производил обновление страницы:
+        # Сохраняем изменения и производим обновление страницы:
         db_sess.commit()
+    return redirect('/cabinet')
+
+
+@app.route('/cabinet/dark_mode')
+def cabinet_set_dark_mode():
+    """ Данная функция включает / выключает тёмную тему на сайте для пользователя """
+
+    # Проверяем, авторизован ли пользователь:
+    if current_user.is_authenticated:
+        user = db_sess.query(User).filter(User.id == current_user.id).first()
+
+        # Включаем / выключаем тёмную тему:
+        if user.is_dark_mode == 1:
+            user.is_dark_mode = 0
+        else:
+            user.is_dark_mode = 1
+
+        # Сохраняем изменения и производим обновление страницы:
+        db_sess.commit()
+        print(user.is_dark_mode)
     return redirect('/cabinet')
 
 
@@ -924,12 +962,12 @@ def edit_cabinet():
             is_user_already_exists = db_sess.query(User).filter(User.email == form.email.data,
                                                                 User.email != current_user.email).first()
             if is_user_already_exists:
-                return render_template('/user_pages/cabinet_edit.html', form=form,
+                return render_template(f'/user_pages/cabinet_edit{dt_prefix()}.html', form=form,
                                        message="Такой пользователь уже существует")
 
             # 2. Новые имя и фамилия пользователя содержат до 41 символа:
             if len(form.name.data) > 41 or len(form.surname.data) > 41:
-                return render_template('/user_pages/cabinet_edit.html', form=form,
+                return render_template(f'/user_pages/cabinet_edit{dt_prefix()}.html', form=form,
                                        message="Слишком длинное имя / фамилия")
 
             # Все условия соблюдены, значит, можем обновлять данные:
@@ -953,10 +991,10 @@ def edit_cabinet():
             return redirect('/cabinet')
 
         # Загружаем форму
-        return render_template('/user_pages/cabinet_edit.html', form=form)
+        return render_template(f'/user_pages/cabinet_edit{dt_prefix()}.html', form=form)
 
     # Ничего не загружаем, если пользователь не авторизован:
-    return render_template('/user_pages/cabinet_edit.html')
+    return render_template(f'/user_pages/cabinet_edit{dt_prefix()}.html')
 
 
 @app.route('/cabinet/change-password', methods=['GET', 'POST'])
@@ -983,17 +1021,17 @@ def edit_password():
 
             # 1. Пользователь указал свой текущий пароль перед изменением:
             if not current_user.check_password(current_password):
-                return render_template('/user_pages/change_password.html', form=form,
+                return render_template(f'/user_pages/change_password{dt_prefix()}.html', form=form,
                                        message='Вы указали неверный пароль')
 
             # 2. Поля "Пароль" и "Повторите пароль" совпадают:
             if new_password != repeat_password:
-                return render_template('/user_pages/change_password.html', form=form,
+                return render_template(f'/user_pages/change_password{dt_prefix()}.html', form=form,
                                        message="Введённые пароли не совпадают")
 
             # 3. Пароль содержит от 9 символов и содержит не только цифры:
             if any([len(new_password) < 9, new_password.isdigit()]):
-                return render_template('/user_pages/change_password.html', form=form,
+                return render_template(f'/user_pages/change_password{dt_prefix()}.html', form=form,
                                        message="Пароль содержит менее 9 символов или содержит только цифры")
 
             # Все условия пройдены - обновляем пароль:
@@ -1002,13 +1040,14 @@ def edit_password():
             db_sess.commit()
 
             # Переводим пользователя в личный кабинет:
-            return render_template('/user_pages/change_password.html', form=form, message='Пароль успешно изменён')
+            return render_template(f'/user_pages/change_password{dt_prefix()}.html',
+                                   form=form, message='Пароль успешно изменён')
 
         # Загружаем форму:
-        return render_template('/user_pages/change_password.html', form=form)
+        return render_template(f'/user_pages/change_password{dt_prefix()}.html', form=form)
 
     # Ничего не загружаем, если пользователь не авторизован:
-    return render_template('/user_pages/change_password.html')
+    return render_template(f'/user_pages/change_password{dt_prefix()}.html')
 
 
 @app.route('/cabinet/delete_profile', methods=['GET', 'POST'])
@@ -1041,22 +1080,22 @@ def delete_profile():
 
             # 1. Пользователь должен ввести свою электронную почту, указанную у него в профиле:
             if current_user.email != email:
-                return render_template('/user_pages/delete_profile.html', form=form,
+                return render_template(f'/user_pages/delete_profile{dt_prefix()}.html', form=form,
                                        message='Неправильно введена электронная почта')
 
             # 2. Пользователь должен указать свой текущий пароль:
             if not user.check_password(password):
-                return render_template('/user_pages/delete_profile.html', form=form,
+                return render_template(f'/user_pages/delete_profile{dt_prefix()}.html', form=form,
                                        message='Вы указали неправильный пароль')
 
             # 3. Пользователь должен повторить свой текущий пароль в спец. форме:
             if password != repeat_password:
-                return render_template('/user_pages/delete_profile.html', form=form,
+                return render_template(f'/user_pages/delete_profile{dt_prefix()}.html', form=form,
                                        message='Пароли не совпадают')
 
             # 4. Пользователь должен нажать на специальную галочку, которая подтвердит всю серьёзность его намерений:
             if not confirm:
-                return render_template('user_pages/delete_profile.html', form=form,
+                return render_template(f'user_pages/delete_profile{dt_prefix()}.html', form=form,
                                        message='Вы не нажали на галочку')
 
             # Если пройдены все условия, то удаляем аккаунт:
@@ -1072,10 +1111,10 @@ def delete_profile():
             return redirect('/login')
 
         # Загружаем форму:
-        return render_template('/user_pages/delete_profile.html', form=form)
+        return render_template(f'/user_pages/delete_profile{dt_prefix()}.html', form=form)
 
     # Ничего не загружаем, если пользователь не авторизован:
-    return render_template('/user_pages/delete_profile.html')
+    return render_template(f'/user_pages/delete_profile{dt_prefix()}.html')
 
 
 @app.route('/user/<int:user_id>')
@@ -1101,12 +1140,12 @@ def user_information(user_id):
         in_featured = len([1 for u in user_lib if u.is_favourite == 1])
 
         # Загрузка страницы со всей информацией:
-        return render_template('/information_pages/about_user.html', user=user,
+        return render_template(f'/information_pages/about_user{dt_prefix()}.html', user=user,
                                in_library=in_library, in_featured=in_featured,
                                recognized_total=recognized_total, link=link)
 
     # Загрузка пустой страницы:
-    return render_template('/information_pages/about_user.html')
+    return render_template(f'/information_pages/about_user{dt_prefix()}.html')
 
 
 @app.route('/administrator')
@@ -1131,7 +1170,7 @@ def administrator():
 
     # Если проверка пройдена, то загружаем кабинет администратора:
     users = [u for u in db_sess.query(User).all() if u.id > 0]
-    return render_template('/admin_page/admin.html', users=users)
+    return render_template(f'/admin_page/admin_dark{dt_prefix()}.html', users=users)
 
 
 @app.route('/administrator/reset_user/<int:user_id>')
